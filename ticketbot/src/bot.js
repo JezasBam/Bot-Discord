@@ -7,6 +7,21 @@ import { loadEvents } from './loaders/events.js';
 import { setupGracefulShutdown } from './core/graceful-shutdown.js';
 import { startCooldownCleanup, stopCooldownCleanup } from './features/tickets/index.js';
 
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function isTransientNetworkError(err) {
+  const code = err?.code;
+  return code === 'ENOTFOUND' || code === 'EAI_AGAIN' || code === 'ECONNRESET' || code === 'ETIMEDOUT';
+}
+
+function isInvalidTokenError(err) {
+  if (err?.code === 'TokenInvalid') return true;
+  const msg = typeof err?.message === 'string' ? err.message : '';
+  return /invalid token/i.test(msg);
+}
+
 export async function createBot() {
   const config = loadConfig();
 
@@ -67,17 +82,37 @@ export async function createBot() {
 
   startCooldownCleanup();
 
+  client.logger = logger;
+
   return { client, config, logger, context };
 }
 
 export async function startBot() {
   const { client, config, logger } = await createBot();
 
-  try {
-    await client.login(config.discord.token);
-  } catch (err) {
-    logger.error('Failed to login:', err);
-    process.exitCode = 1;
+  let attempt = 0;
+  while (true) {
+    attempt += 1;
+    try {
+      await client.login(config.discord.token);
+      break;
+    } catch (err) {
+      logger.error('Failed to login:', err);
+
+      if (isInvalidTokenError(err)) {
+        process.exitCode = 1;
+        break;
+      }
+
+      if (!isTransientNetworkError(err)) {
+        process.exitCode = 1;
+        break;
+      }
+
+      const delayMs = Math.min(30_000, 1_000 * 2 ** Math.min(attempt - 1, 5));
+      logger.error(`Retrying Discord login in ${Math.round(delayMs / 1000)}s...`);
+      await sleep(delayMs);
+    }
   }
 
   return client;

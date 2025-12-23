@@ -1,0 +1,60 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    box-sizing: border-box;
+  }
+
+  body {
+    margin: 0;
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: #1e1f22;
+    border-radius: 4px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: #2b2d31;
+  }
+}
+
+@layer components {
+  .btn {
+    @apply px-4 py-2 rounded font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-discord-dark disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .btn-primary {
+    @apply bg-discord-blurple text-white hover:bg-opacity-80 focus:ring-discord-blurple;
+  }
+
+  .btn-secondary {
+    @apply bg-discord-lighter text-discord-text hover:bg-discord-light focus:ring-discord-lighter;
+  }
+
+  .btn-danger {
+    @apply bg-discord-red text-white hover:bg-opacity-80 focus:ring-discord-red;
+  }
+
+  .input {
+    @apply w-full px-3 py-2 bg-discord-darker border border-discord-light rounded text-discord-text placeholder-discord-muted focus:outline-none focus:border-discord-blurple transition-colors;
+  }
+
+  .label {
+    @apply block text-sm font-medium text-discord-muted mb-1;
+  }
+}

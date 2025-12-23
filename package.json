@@ -1,33 +1,29 @@
 {
-  "name": "discord-ticket-bot",
-  "version": "2.0.0",
+  "name": "discord-bot-monorepo",
+  "version": "1.0.0",
   "private": true,
   "type": "module",
-  "engines": {
-    "node": ">=22.12.0"
-  },
+  "workspaces": [
+    "ticketbot",
+    "discordhooks",
+    "frontend"
+  ],
   "scripts": {
-    "prestart": "npm run lint && npm run format:check && npm run test",
-    "start": "node src/index.js",
-    "dev": "node --watch src/index.js",
-    "deploy": "node src/deploy-commands.js",
-    "deploy:guild": "node src/deploy-commands.js",
-    "lint": "eslint src/",
-    "lint:fix": "eslint src/ --fix",
-    "format": "prettier --write src/",
-    "format:check": "prettier --check src/",
-    "test": "vitest run",
-    "test:watch": "vitest",
-    "test:coverage": "vitest run --coverage"
-  },
-  "dependencies": {
-    "discord.js": "^14.25.1",
-    "dotenv": "^16.4.5"
+    "ticketbot:start": "npm run start -w ticketbot",
+    "ticketbot:dev": "npm run dev -w ticketbot",
+    "ticketbot:deploy": "npm run deploy -w ticketbot",
+    "hooks:start": "npm run start -w discordhooks",
+    "hooks:dev": "npm run dev -w discordhooks",
+    "frontend:dev": "npm run dev -w frontend",
+    "frontend:build": "npm run build -w frontend",
+    "dev": "concurrently -n ticketbot,hooks,frontend -c yellow,blue,green \"npm run ticketbot:dev\" \"npm run hooks:dev\" \"npm run frontend:dev\"",
+    "start": "concurrently -n ticketbot,hooks,frontend -c yellow,blue,green \"npm run ticketbot:start\" \"npm run hooks:start\" \"npm run frontend:dev\"",
+    "install:all": "npm install"
   },
   "devDependencies": {
-    "@eslint/js": "^9.17.0",
-    "eslint": "^9.17.0",
-    "prettier": "^3.4.2",
-    "vitest": "^2.1.8"
+    "concurrently": "^9.1.0"
+  },
+  "engines": {
+    "node": ">=22.12.0"
   }
 }
