@@ -1,167 +1,117 @@
-# 🎫 Discord Ticket Bot
+# 🎫 Ticket Bot - Sistem Tickete Discord
 
 Bot Discord pentru sistem de tickete cu thread-uri private și forum integration.
 
-## ✨ Features
+## 🎯 Ce Face
 
-- **Bilingv** - Română și Engleză
-- **Thread-uri private** - fiecare ticket e un thread privat
-- **Rol Support** - echipa de support dedicată
-- **Transcript automat** - salvat la închidere
-- **Arhivare fișiere** - attachments salvate automat
-- **Forum support** - log în canal forum cu tag-uri colorate
-- **Buton Închide** - închidere ticket cu tag Rezolvat
-- **Tag-uri colorate** - 🔵 INFO, 🟠 Support, 🟢 Rezolvat
-- **Verificare automată** - reparare tag-uri fără buline
+Sistem complet de tickete cu:
+- **Thread-uri private** pentru fiecare ticket
+- **Forum integration** cu tag-uri colorate
+- **Rol Support** dedicat pentru echipă
+- **Transcript automat** la închidere
+- **Suport bilingv** (Română/Engleză)
 
 ## 🚀 Quick Start
 
-### 1. Instalare
+### **Setup Rapid**
 ```bash
 npm install
+npm run deploy        # Comenzi globale (~1h)
+npm run deploy:guild  # Doar pe server (instant)
+npm start             # Pornește botul
 ```
 
-### 2. Configurare `.env`
-```env
-DISCORD_TOKEN=token_bot_aici
-CLIENT_ID=client_id_aici
-GUILD_ID=guild_id_pentru_dev    # opțional
-LOG_LEVEL=info                   # opțional: error/warn/info/debug
-```
-
-### 3. Deploy comenzi
+### **Development**
 ```bash
-npm run deploy        # global (durează ~1h)
-npm run deploy:guild  # doar pe guild (instant)
+npm run dev           # Development mode
+npm run lint          # Verifică cod
+npm run format        # Formatează cod
+npm test              # Rulează teste
 ```
 
-### 4. Pornire
-```bash
-npm start
-```
+## 📋 Comenzi Discord
 
-## 📋 Comenzi
-
+### **Ticket System**
 | Comandă | Descriere | Permisiuni |
 |---------|-----------|------------|
-| `/ticketsetup` | Configurează sistemul de tickete (RO/EN) | Manage Guild |
-| `/ping` | Test - verifică că botul răspunde | - |
+| `/ticketsetup` | Configurează sistem tickete (RO/EN) | Manage Guild |
+| `/ping` | Test connectivity | - |
 
-**Comenzi Admin (discordadmins):**
+### **Moderare (Integrat)**
 | Comandă | Descriere | Permisiuni |
 |---------|-----------|------------|
-| `/check-support-tag` | Verifică și repară tag-urile forum | Manage Guild |
+| `/check-support-tag` | Verifică și repară tag-uri forum | Manage Guild |
 
-## 🎯 Cum funcționează
+### **Context Menu**
+| Acțiune | Descriere | Permisiuni |
+|---------|-----------|------------|
+| 🔇 Mute User | Mute temporar (1-1440 min) | Support Role |
+| 👢 Kick User | Kick utilizator | Owner Only |
+| 🔨 Ban User | Ban permanent cu auto-renewal | Owner Only |
 
-### **Workflow Ticket:**
+## 🎯 Workflow Tickete
+
 1. **Admin** rulează `/ticketsetup` → creează panel + rol Support + tag-uri
-2. **User** apasă butonul → completează formular → se creează thread privat
-3. **Support** vede notificare → apasă Join → intră în thread
+2. **User** apasă buton → completează formular → thread privat creat
+3. **Support** primește notificare → apasă Join → intră în thread
 4. **Închidere normală** → Close → transcript salvat → thread șters
-5. **Închidere din forum** → Buton Închide → aplică tag 🟢 Rezolvat
+5. **Închidere forum** → Buton Închide → aplică tag 🟢 Rezolvat
 
-### **Sistem de Tag-uri:**
+## 🎨 Tag-uri Colorate
+
 - **🔵 INFO** - Informații generale (albastru)
 - **🟠 Support** - Tickete active (portocaliu)  
 - **🟢 Rezolvat** - Tickete închise (verde)
 
-### **Verificare Automată:**
-- La fiecare click pe butonul "Închide"
-- Bot verifică tag-urile forum-ului
-- Repară automat tag-uri fără buline
-- Elimină tag-uri duplicate
+## ⚙️ Configurare
 
-## 🛠 Development
-
-```bash
-npm run dev          # watch mode
-npm run lint         # verifică cod
-npm run format       # formatează cod
-npm test             # rulează teste
+### **Environment Variables (.env)**
+```env
+DISCORD_TOKEN=your_bot_token
+CLIENT_ID=your_client_id
+GUILD_ID=guild_id_for_dev    # Optional
+LOG_LEVEL=info               # error/warn/info/debug
 ```
 
-> La `npm start` se rulează automat: lint → format check → tests → start
-
-## 📁 Structură
-
-```
-src/
-├── index.js              # Entry point
-├── bot.js                # Inițializare bot
-├── config/               # Configurare + constante
-├── core/                 # Logger, errors, retry, shutdown
-├── commands/             # Slash commands
-├── events/               # Event handlers
-├── features/tickets/     # Logică tickete (handlers, ui, i18n)
-├── storage/              # Database + repositories
-└── util/                 # Helpers (paths, preflight)
-
-discordadmins/
-├── commands/
-│   ├── moderation.js     # Mute, Kick, Ban
-│   ├── check-support-tag.js  # Verificare tag-uri
-│   └── ensure-info-tag.js     # Creare INFO tag
-├── utils/
-│   ├── moderation-forum.js   # Forum management
-│   └── permissions.js        # Verificări permisiuni
-└── config/
-    └── index.js              # Configurare moderare
-```
-
-## ⚙️ Permisiuni Bot
-
-Botul are nevoie de:
+### **Permisiuni Bot Necesar**
 - Manage Channels, Manage Roles
 - View Channels, Send Messages
 - Create Private Threads, Manage Threads
 - Attach Files, Embed Links, Read Message History
 
-## 📝 Fișiere importante
+## 📁 Structură
 
-| Fișier | Scop |
-|--------|------|
-| `.env` | Variabile secrete (NU se urcă pe git) |
-| `.env.example` | Template pentru `.env` |
-| `data/db.json` | Baza de date (auto-creată) |
-| `REFACTOR_ANALYSIS.md` | Analiză cod discordadmins |
+```
+ticketbot/
+├── src/
+│   ├── index.js              # Entry point
+│   ├── bot.js                # Bot initialization
+│   ├── commands/             # Slash commands
+│   ├── events/               # Event handlers
+│   ├── features/tickets/     # Ticket logic
+│   ├── config/               # Configuration
+│   ├── core/                 # Logger, errors, retry
+│   └── storage/              # Database layer
+├── discordadmins/            # Moderare module
+└── data/                     # Database files
+```
 
 ## 🔧 Troubleshooting
 
-**Bot nu pornește?**
-- Verifică `.env` - token valid?
-- Verifică permisiunile botului pe server
+### **Probleme Comune**
+- **Bot nu pornește?** → Verifică `.env` token și permisiuni bot
+- **Comenzile nu apar?** → Rulează `npm run deploy` (așteaptă 1h pentru global)
+- **Erori tickete?** → Verifică permisiunile botului în canale/categorii
+- **Tag-uri problemă?** → Rulează `/check-support-tag` pentru reparare
 
-**Comenzile nu apar?**
-- Rulează `npm run deploy`
-- Așteaptă ~1h pentru comenzi globale
+## 📦 Tech Stack
 
-**Erori la tickete?**
-- Verifică că botul are permisiuni în categoria/canalul respectiv
+- **Discord.js v14** - API Discord
+- **Node.js 22+** - Runtime
+- **Pino** - Logging performant
+- **Vitest** - Testing framework
 
-**Probleme tag-uri?**
-- Rulează `/check-support-tag` pentru verificare
-- Bot-ul repară automat tag-urile la utilizare
+---
 
-## 🎨 Caracteristici Noi
-
-### **Tag-uri Colorate cu Buline:**
-- **🔵 INFO** - Albastru cu borduri albastre
-- **🟠 Support** - Portocaliu cu borduri portocalii
-- **🟢 Rezolvat** - Verde cu borduri verzi
-
-### **Buton Închide în Forum:**
-- Postări în forum cu buton "Închide"
-- Aplică automat tag-ul "Rezolvat"
-- Rămâne vizibil după închidere
-
-### **Verificare Automată:**
-- Detectează tag-uri vechi fără buline
-- Le înlocuiește automat cu tag-uri corecte
-- Elimină tag-uri duplicate
-
-### **Forum Integration:**
-- Thread-uri private pentru tickete
-- Postări în forum pentru tracking
-- Tag-uri colorate pentru organizare
-- Buton de închidere în postări
+**Part of:** Discord Bot Monorepo  
+**Version:** 1.0.0

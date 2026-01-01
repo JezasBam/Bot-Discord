@@ -1,15 +1,15 @@
 # 🤖 Discord Bot Monorepo
 
-Sistem complet de moderare și tickete pentru Discord cu multiple module integrate.
+Sistem complet de moderare și tickete pentru Discord cu 4 module integrate.
 
-## 🎯 Overview
+## 🎯 Ce Face Proiectul
 
-Acest proiect conține un sistem complet de moderare și management tickete pentru servere Discord, cu următoarele componente:
+Acesta este un **bot Discord complet** cu următoarele componente:
 
-- **🎫 Ticket Bot** - Sistem de tickete cu thread-uri private și forum integration
-- **🛡️ Discord Admins** - Sistem de moderare cu mute, kick, ban și forum tracking
-- **🔧 Discord Hooks** - Webhooks și integrări externe
-- **🌐 Frontend** - Interfață web pentru management și configurare
+- **🎫 Ticket Bot** - Sistem tickete cu thread-uri private și forum integration
+- **🛡️ Discord Admins** - Moderare (Mute, Kick, Ban) cu tracking în forum
+- **🔧 Discord Hooks** - API web pentru webhook-uri și integrări externe  
+- **🌐 Frontend** - Interfață web React pentru management
 
 ## ✨ Features Principale
 
@@ -34,221 +34,118 @@ Acest proiect conține un sistem complet de moderare și management tickete pent
 - Verificare automată a tag-urilor fără buline
 - Eliminare tag-uri duplicate
 
-## 🚀 Quick Start
+## 🚀 Comenzi Importante
 
-### 1. Instalare
+### **Setup Rapid**
 ```bash
-npm install
+npm install                    # Instalează toate dependențele
+npm run deploy                 # Deploy comenzi globale (~1h)
+npm run deploy:guild           # Deploy doar pe server (instant)
+npm start                      # Pornește toate serviciile
 ```
 
-### 2. Configurare `.env`
-```env
-DISCORD_TOKEN=token_bot_aici
-CLIENT_ID=client_id_aici
-GUILD_ID=guild_id_pentru_dev    # opțional
-LOG_LEVEL=info                   # opțional: error/warn/info/debug
-```
-
-### 3. Deploy comenzi
+### **Development**
 ```bash
-npm run deploy        # global (durează ~1h)
-npm run deploy:guild  # doar pe guild (instant)
+npm run dev                    # Pornește toate modulele în development
+npm run dev:minimal            # Doar ticketbot + discordadmins
+npm run frontend:dev           # Doar frontend React
+npm run test                   # Rulează toate testele
+npm run lint                   # Verifică codul
 ```
 
-### 4. Pornire
+### **Module Specifice**
 ```bash
-npm start
+npm run ticketbot:start        # Doar botul de tickete
+npm run hooks:start            # Doar API webhooks
+npm run frontend:build         # Build frontend
 ```
 
-## 📁 Structură Proiect
+## 📋 Comenzi Discord
 
-```
-discord-bot-monorepo/
-├── ticketbot/                 # 🎫 Sistem de tickete
-│   ├── src/
-│   │   ├── commands/          # Slash commands
-│   │   ├── features/tickets/  # Logică tickete
-│   │   ├── events/            # Event handlers
-│   │   └── config/            # Configurare
-│   └── README.md              # Documentație ticketbot
-├── discordadmins/             # 🛡️ Sistem moderare
-│   ├── commands/              # Moderare commands
-│   ├── utils/                 # Permisiuni și forum
-│   └── README.md              # Documentație moderare
-├── discordhooks/              # 🔧 Webhooks și integrări
-│   ├── src/                   # API endpoints
-│   └── README.md              # Documentație hooks
-├── frontend/                  # 🌐 Interfață web
-│   ├── src/                   # React components
-│   └── README.md              # Documentație frontend
-├── shared/                    # 📦 Utilități comune
-└── package.json               # Configurare monorepo
-```
-
-## 📋 Comenzi Principale
-
-### **Ticket Bot**
+### **Ticket System**
 | Comandă | Descriere | Permisiuni |
 |---------|-----------|------------|
-| `/ticketsetup` | Configurează sistemul de tickete | Manage Guild |
-| `/ping` | Test - verifică că botul răspunde | - |
+| `/ticketsetup` | Configurează sistem tickete | Manage Guild |
+| `/ping` | Test connectivity | - |
 
-### **Discord Admins**
-| Comandă | Descriere | Permisiuni |
-|---------|-----------|------------|
-| `/check-support-tag` | Verifică și repară tag-urile forum | Manage Guild |
-
-### **Context Menu (Discord Admins)**
+### **Moderare (Context Menu)**
 | Acțiune | Descriere | Permisiuni |
 |---------|-----------|------------|
-| 🔇 Mute User | Mute temporar | Support Role |
+| 🔇 Mute User | Mute temporar (1-1440 min) | Support Role |
 | 👢 Kick User | Kick utilizator | Owner Only |
-| 🔨 Ban User | Ban permanent | Owner Only |
+| 🔨 Ban User | Ban permanent cu auto-renewal | Owner Only |
 
-## 🎯 Workflow-uri
-
-### **Workflow Tickete:**
-1. **Admin** rulează `/ticketsetup` → creează panel + tag-uri
-2. **User** apasă buton → completează formular → thread privat
-3. **Support** vede notificare → apasă Join → intră în thread
-4. **Închidere normală** → Close → transcript salvat
-5. **Închidere forum** → Buton Închide → tag 🟢 Rezolvat
-
-### **Workflow Moderare:**
-1. **Support** click dreapta → 🔇 Mute User → modal durată
-2. **Owner** click dreapta → 👢 Kick User / 🔨 Ban User
-3. **Forum tracking** → thread automat cu tag 🟠 Support
-4. **Unmute/Unban** → butoane direct din forum
-5. **Auto-renewal** → ban permanent se reînnoiește
-
-## 🛠 Development
-
-```bash
-# Development mode
-npm run dev
-
-# Build
-npm run build
-
-# Lint
-npm run lint
-
-# Format
-npm run format
-
-# Tests
-npm test
-```
-
-### **Module Specifice:**
-```bash
-# Ticket bot
-npm run ticketbot:dev
-npm run ticketbot:build
-
-# Discord admins
-npm run discordadmins:dev
-npm run discordadmins:build
-
-# Frontend
-npm run frontend:dev
-npm run frontend:build
-```
+### **Admin Commands**
+| Comandă | Descriere | Permisiuni |
+|---------|-----------|------------|
+| `/check-support-tag` | Verifică și repară tag-uri forum | Manage Guild |
 
 ## ⚙️ Configurare
 
-### **Environment Variables:**
+### **Environment Variables (.env)**
 ```env
-DISCORD_TOKEN=token_bot_aici
-CLIENT_ID=client_id_aici
-GUILD_ID=guild_id_pentru_dev
-LOG_LEVEL=info
+# Required
+DISCORD_TOKEN=your_bot_token_here
+CLIENT_ID=your_application_client_id
+DISCORD_CLIENT_SECRET=your_application_client_secret
+DISCORD_REDIRECT_URI=http://localhost:3001/auth/callback
+
+# Optional
+GUILD_ID=                    # Pentru deploy rapid pe un singur server
+LOG_LEVEL=warn               # error/warn/info/debug
 ```
 
-### **Configurare Moderare:**
-```javascript
-// ticketbot/src/config/index.js
-moderation: {
-  adminRoles: ['Support'],
-  muteDuration: 5
-}
+### **Structură Proiect**
+```
+Bot-Discord/
+├── ticketbot/          # 🎫 Bot principal tickete + moderare
+├── discordadmins/      # 🛡️ Modul moderare integrat
+├── discordhooks/       # 🔧 API webhooks (Express + Socket.io)
+├── frontend/           # 🌐 Interfață React (Vite + TypeScript)
+├── shared/             # 📦 Utilități comune
+└── callback-server.js  # 🔄 OAuth callback handler
 ```
 
 ## 🔧 Troubleshooting
 
-### **Bot nu pornește?**
-- Verifică `.env` - token valid?
-- Verifică permisiunile botului pe server
+### **Probleme Comune**
+- **Bot nu pornește?** → Verifică `.env` și permisiunile botului
+- **Comenzile nu apar?** → Rulează `npm run deploy` (așteaptă 1h pentru global)
+- **Erori tickete?** → Verifică permisiunile botului în canale
+- **Tag-uri problemă?** → Rulează `/check-support-tag`
 
-### **Comenzile nu apar?**
-- Rulează `npm run deploy`
-- Așteaptă ~1h pentru comenzi globale
+### **Permisiuni Bot Necesar**
+- Manage Channels, Manage Roles
+- View Channels, Send Messages  
+- Create Private Threads, Manage Threads
+- Attach Files, Embed Links, Read Message History
 
-### **Erori la tickete?**
-- Verifică permisiunile botului în categorii/canale
-- Rulează `/check-support-tag` pentru verificare tag-uri
-
-### **Probleme moderare?**
-- Verifică rolul Support este configurat corect
-- Owner-ul are permisiuni necesare
-- Forum-ul de moderare există
-
-## 📚 Documentație
+## 📚 Documentație Detaliată
 
 - **[Ticket Bot](./ticketbot/README.md)** - Documentație completă sistem tickete
-- **[Discord Admins](./discordadmins/README.md)** - Documentație sistem moderare
+- **[Discord Admins](./discordadmins/README.md)** - Documentație sistem moderare  
 - **[Refactoring Analysis](./discordadmins/REFACTOR_ANALYSIS.md)** - Analiză cod și recomandări
 
-## 🔒 Securitate
+## 🔒 Securitate & Performanță
 
-- **Verificări permisiuni** - Multiple niveluri de securitate
-- **Protecție auto-acțiuni** - Previne kick/ban self
-- **Logging complet** - Toate acțiunile sunt logate
-- **Role hierarchy** - Verificare ierarhie roluri
-- **Auto-renewal securizat** - Ban permanent cu reînnoire automată
+### **Securitate**
+- Verificări permisiuni multiple niveluri
+- Protecție auto-acțiuni (kick/ban self)
+- Logging complet al tuturor acțiunilor
+- Auto-renewal securizat pentru ban-uri
 
-## 📦 Dependențe
+### **Performanță**
+- Logging eficient cu Pino
+- Error handling robust
+- Memory management automat
+- Architecture modulară pentru scalabilitate
 
-- **Discord.js** v14+ - API Discord
-- **Node.js** 18+ - Runtime
-- **React** - Frontend interface
-- **Pino** - Logging
-- **Vitest** - Testing
+## � Tech Stack
 
-## 🎨 Caracteristici Unice
-
-### **Tag-uri Colorate cu Buline:**
-- Sistem unic de organizare vizuală
-- Verificare automată a tag-urilor
-- Eliminare duplicate și reparare automată
-
-### **Forum Integration:**
-- Tracking complet al tuturor acțiunilor
-- Thread-uri private pentru tickete și moderare
-- Butoane de acțiune direct din forum
-
-### **Auto-renewal System:**
-- Ban permanent cu reînnoire la fiecare 6 zile
-- Sistem robust împotriva expirării
-- Logging complet al reînnoirilor
-
-## 📊 Performance
-
-- **Logging eficient** - Pino pentru performanță
-- **Error handling** - Gestionare robustă a erorilor
-- **Memory management** - Curățare automată a resurselor
-- **Scalable architecture** - Design modular pentru extensibilitate
-
-## 🚀 Future Features
-
-- [ ] Dashboard web pentru management
-- [ ] Sistem de raportare avansat
-- [ ] Integrări cu platforme externe
-- [ ] Sistem de notificări personalizate
-- [ ] Backup automat al configurațiilor
+- **Backend**: Node.js 22+, Discord.js v14
+- **Frontend**: React 18, TypeScript, Vite, TailwindCSS
+- **API**: Express, Socket.io, CORS
+- **Testing**: Vitest, Testing Library
+- **Tools**: ESLint, Prettier, Pino Logger
 
 ---
-
-**Autor:** Cascading AI Assistant  
-**Versiune:** 1.0.0  
-**Licență:** MIT

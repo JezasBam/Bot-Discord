@@ -3,6 +3,9 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { EmbedEditor } from '../../../src/features/embedEditor/components/EmbedEditor';
 
+// Mock window.confirm
+global.confirm = vi.fn(() => true);
+
 // Mock the child components to focus on EmbedEditor interactions
 vi.mock('../../../src/features/embedEditor/components/MessageSection', () => ({
   MessageSection: vi.fn(({ content, username, avatarUrl, onContentChange, onUsernameChange, onAvatarChange }) => (
