@@ -1,6 +1,6 @@
 # 🎫 Discord Ticket Bot
 
-Bot Discord pentru sistem de tickete cu thread-uri private.
+Bot Discord pentru sistem de tickete cu thread-uri private și forum integration.
 
 ## ✨ Features
 
@@ -9,7 +9,10 @@ Bot Discord pentru sistem de tickete cu thread-uri private.
 - **Rol Support** - echipa de support dedicată
 - **Transcript automat** - salvat la închidere
 - **Arhivare fișiere** - attachments salvate automat
-- **Forum support** - log în canal forum
+- **Forum support** - log în canal forum cu tag-uri colorate
+- **Buton Închide** - închidere ticket cu tag Rezolvat
+- **Tag-uri colorate** - 🔵 INFO, 🟠 Support, 🟢 Rezolvat
+- **Verificare automată** - reparare tag-uri fără buline
 
 ## 🚀 Quick Start
 
@@ -44,12 +47,30 @@ npm start
 | `/ticketsetup` | Configurează sistemul de tickete (RO/EN) | Manage Guild |
 | `/ping` | Test - verifică că botul răspunde | - |
 
+**Comenzi Admin (discordadmins):**
+| Comandă | Descriere | Permisiuni |
+|---------|-----------|------------|
+| `/check-support-tag` | Verifică și repară tag-urile forum | Manage Guild |
+
 ## 🎯 Cum funcționează
 
-1. **Admin** rulează `/ticketsetup` → creează panel + rol Support
+### **Workflow Ticket:**
+1. **Admin** rulează `/ticketsetup` → creează panel + rol Support + tag-uri
 2. **User** apasă butonul → completează formular → se creează thread privat
 3. **Support** vede notificare → apasă Join → intră în thread
-4. **Oricine** apasă Close → transcript salvat → thread șters
+4. **Închidere normală** → Close → transcript salvat → thread șters
+5. **Închidere din forum** → Buton Închide → aplică tag 🟢 Rezolvat
+
+### **Sistem de Tag-uri:**
+- **🔵 INFO** - Informații generale (albastru)
+- **🟠 Support** - Tickete active (portocaliu)  
+- **🟢 Rezolvat** - Tickete închise (verde)
+
+### **Verificare Automată:**
+- La fiecare click pe butonul "Închide"
+- Bot verifică tag-urile forum-ului
+- Repară automat tag-uri fără buline
+- Elimină tag-uri duplicate
 
 ## 🛠 Development
 
@@ -75,6 +96,17 @@ src/
 ├── features/tickets/     # Logică tickete (handlers, ui, i18n)
 ├── storage/              # Database + repositories
 └── util/                 # Helpers (paths, preflight)
+
+discordadmins/
+├── commands/
+│   ├── moderation.js     # Mute, Kick, Ban
+│   ├── check-support-tag.js  # Verificare tag-uri
+│   └── ensure-info-tag.js     # Creare INFO tag
+├── utils/
+│   ├── moderation-forum.js   # Forum management
+│   └── permissions.js        # Verificări permisiuni
+└── config/
+    └── index.js              # Configurare moderare
 ```
 
 ## ⚙️ Permisiuni Bot
@@ -92,6 +124,7 @@ Botul are nevoie de:
 | `.env` | Variabile secrete (NU se urcă pe git) |
 | `.env.example` | Template pentru `.env` |
 | `data/db.json` | Baza de date (auto-creată) |
+| `REFACTOR_ANALYSIS.md` | Analiză cod discordadmins |
 
 ## 🔧 Troubleshooting
 
@@ -105,3 +138,30 @@ Botul are nevoie de:
 
 **Erori la tickete?**
 - Verifică că botul are permisiuni în categoria/canalul respectiv
+
+**Probleme tag-uri?**
+- Rulează `/check-support-tag` pentru verificare
+- Bot-ul repară automat tag-urile la utilizare
+
+## 🎨 Caracteristici Noi
+
+### **Tag-uri Colorate cu Buline:**
+- **🔵 INFO** - Albastru cu borduri albastre
+- **🟠 Support** - Portocaliu cu borduri portocalii
+- **🟢 Rezolvat** - Verde cu borduri verzi
+
+### **Buton Închide în Forum:**
+- Postări în forum cu buton "Închide"
+- Aplică automat tag-ul "Rezolvat"
+- Rămâne vizibil după închidere
+
+### **Verificare Automată:**
+- Detectează tag-uri vechi fără buline
+- Le înlocuiește automat cu tag-uri corecte
+- Elimină tag-uri duplicate
+
+### **Forum Integration:**
+- Thread-uri private pentru tickete
+- Postări în forum pentru tracking
+- Tag-uri colorate pentru organizare
+- Buton de închidere în postări

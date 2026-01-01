@@ -1,14 +1,14 @@
-import Dexie, { type Table } from 'dexie';
-import type { EmbedProject } from '../types';
+import Dexie, { type Table } from "dexie";
+import type { EmbedProject } from "../types";
 
 export class EmbedBuilderDB extends Dexie {
   projects!: Table<EmbedProject, string>;
 
   constructor() {
-    super('EmbedBuilderDB');
+    super("EmbedBuilderDB");
 
     this.version(1).stores({
-      projects: 'id, name, updatedAt',
+      projects: "id, name, updatedAt",
     });
   }
 }

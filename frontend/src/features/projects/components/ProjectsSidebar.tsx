@@ -1,15 +1,15 @@
-import { useState } from 'react';
-import { Plus, Search, Trash2, Copy } from 'lucide-react';
-import type { EmbedProject } from '../types';
-import { clsx } from 'clsx';
+import { useState } from "react";
+import { Plus, Search, Trash2, Copy } from "lucide-react";
+import type { EmbedProject } from "../types";
+import { clsx } from "clsx";
 
 interface ProjectsSidebarProps {
   projects: EmbedProject[];
   currentProjectId: string | null;
-  onSelectProject: (id: string) => void;
+  onSelectProject: (_id: string) => void;
   onNewProject: () => void;
-  onDeleteProject: (id: string) => void;
-  onDuplicateProject: (id: string) => void;
+  onDeleteProject: (_id: string) => void;
+  onDuplicateProject: (_id: string) => void;
 }
 
 export function ProjectsSidebar({
@@ -20,17 +20,19 @@ export function ProjectsSidebar({
   onDeleteProject,
   onDuplicateProject,
 }: ProjectsSidebarProps) {
-  const [search, setSearch] = useState('');
+  const [search, setSearch] = useState("");
 
   const filtered = projects.filter((p) =>
-    p.name.toLowerCase().includes(search.toLowerCase())
+    p.name.toLowerCase().includes(search.toLowerCase()),
   );
 
   return (
     <div className="flex flex-col h-full">
       {/* Header */}
       <div className="p-4 border-b border-discord-light">
-        <h2 className="text-lg font-semibold text-discord-text mb-3">Projects</h2>
+        <h2 className="text-lg font-semibold text-discord-text mb-3">
+          Projects
+        </h2>
         <button
           onClick={onNewProject}
           className="btn btn-primary w-full flex items-center justify-center gap-2"
@@ -61,7 +63,7 @@ export function ProjectsSidebar({
       <div className="flex-1 overflow-y-auto px-2 pb-4">
         {filtered.length === 0 ? (
           <p className="text-discord-muted text-sm text-center py-4">
-            {projects.length === 0 ? 'No projects yet' : 'No matches found'}
+            {projects.length === 0 ? "No projects yet" : "No matches found"}
           </p>
         ) : (
           <ul className="space-y-1">
@@ -70,10 +72,10 @@ export function ProjectsSidebar({
                 <button
                   onClick={() => onSelectProject(project.id)}
                   className={clsx(
-                    'w-full text-left px-3 py-2 rounded group flex items-center justify-between transition-colors',
+                    "w-full text-left px-3 py-2 rounded group flex items-center justify-between transition-colors",
                     currentProjectId === project.id
-                      ? 'bg-discord-blurple text-white'
-                      : 'hover:bg-discord-lighter text-discord-text'
+                      ? "bg-discord-blurple text-white"
+                      : "hover:bg-discord-lighter text-discord-text",
                   )}
                 >
                   <span className="truncate flex-1">{project.name}</span>

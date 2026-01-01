@@ -13,7 +13,15 @@ function enqueueDb(task) {
 
 async function readJsonFile(filePath) {
   const raw = await fs.readFile(filePath, 'utf8');
-  return JSON.parse(raw);
+  try {
+    return JSON.parse(raw);
+  } catch {
+    // Backup corrupt file and return initial state
+    const backupPath = `${filePath}.corrupt.${Date.now()}`;
+    await fs.rename(filePath, backupPath);
+    console.error(`Corrupt DB file backed up to ${backupPath}`);
+    return { version: 1, guilds: {} };
+  }
 }
 
 async function writeJsonFileAtomic(filePath, data) {

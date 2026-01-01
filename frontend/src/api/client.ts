@@ -1,10 +1,12 @@
-const API_BASE = 'http://localhost:4000/api';
+import { API_BASE } from "../config/env";
 
 export interface Guild {
   id: string;
   name: string;
   icon: string | null;
   memberCount: number;
+  ownerId?: string;
+  isOwner?: boolean;
 }
 
 export interface Channel {
@@ -19,7 +21,7 @@ export interface Category {
   id: string;
   name: string;
   position: number;
-  type: 'category';
+  type: "category";
   children: Channel[];
 }
 
@@ -84,15 +86,17 @@ class ApiClient {
     const response = await fetch(`${this.baseUrl}${path}`, {
       ...options,
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
         ...options?.headers,
       },
     });
 
     if (!response.ok) {
-      const error = await response.json().catch(() => ({ error: 'Unknown error' }));
-      const message = error.details 
-        ? `${error.error}: ${error.details}` 
+      const error = await response
+        .json()
+        .catch(() => ({ error: "Unknown error" }));
+      const message = error.details
+        ? `${error.error}: ${error.details}`
         : error.error || `HTTP ${response.status}`;
       throw new Error(message);
     }
@@ -101,15 +105,15 @@ class ApiClient {
   }
 
   async health(): Promise<HealthCheck> {
-    return this.fetch('/health');
+    return this.fetch("/health");
   }
 
   async bot(): Promise<BotInfo> {
-    return this.fetch('/bot');
+    return this.fetch("/bot");
   }
 
   async getGuilds(): Promise<Guild[]> {
-    return this.fetch('/guilds');
+    return this.fetch("/guilds");
   }
 
   async getGuild(guildId: string): Promise<Guild> {
@@ -120,19 +124,22 @@ class ApiClient {
     return this.fetch(`/guilds/${guildId}/channels`);
   }
 
-  async getChannelMessages(channelId: string, hasEmbeds?: boolean): Promise<DiscordMessage[]> {
+  async getChannelMessages(
+    channelId: string,
+    hasEmbeds?: boolean,
+  ): Promise<DiscordMessage[]> {
     const params = new URLSearchParams();
-    if (hasEmbeds) params.set('hasEmbeds', 'true');
-    const query = params.toString() ? `?${params}` : '';
+    if (hasEmbeds) params.set("hasEmbeds", "true");
+    const query = params.toString() ? `?${params}` : "";
     return this.fetch(`/channels/${channelId}/messages${query}`);
   }
 
   async sendMessage(
     channelId: string,
-    payload: { content?: string; embeds?: MessageEmbed[] }
+    payload: { content?: string; embeds?: MessageEmbed[] },
   ): Promise<DiscordMessage> {
-    return this.fetch('/messages', {
-      method: 'POST',
+    return this.fetch("/messages", {
+      method: "POST",
       body: JSON.stringify({ channelId, ...payload }),
     });
   }
@@ -140,17 +147,17 @@ class ApiClient {
   async editMessage(
     messageId: string,
     channelId: string,
-    payload: { content?: string; embeds?: MessageEmbed[] }
+    payload: { content?: string; embeds?: MessageEmbed[] },
   ): Promise<DiscordMessage> {
     return this.fetch(`/messages/${messageId}`, {
-      method: 'PATCH',
+      method: "PATCH",
       body: JSON.stringify({ channelId, ...payload }),
     });
   }
 
   async deleteMessage(messageId: string, channelId: string): Promise<void> {
     await this.fetch(`/messages/${messageId}?channelId=${channelId}`, {
-      method: 'DELETE',
+      method: "DELETE",
     });
   }
 }

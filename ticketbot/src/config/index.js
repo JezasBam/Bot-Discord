@@ -57,6 +57,11 @@ export function loadConfig() {
       maxAttachmentBytes: validatePositiveInt(optionalEnv('MAX_ATTACHMENT_BYTES'), 7_500_000),
       maxAttachmentFiles: validatePositiveInt(optionalEnv('MAX_ATTACHMENT_FILES'), 15)
     },
+    moderation: {
+      adminRoles: optionalEnv('ADMIN_ROLES', 'Support').split(',').map(r => r.trim()),
+      muteDuration: validatePositiveInt(optionalEnv('MUTE_DURATION_MINUTES'), 5),
+      logChannel: optionalEnv('MOD_LOG_CHANNEL')
+    },
     logging: {
       level: validateLogLevel(optionalEnv('LOG_LEVEL', 'warn')),
       format: optionalEnv('LOG_FORMAT', process.env.NODE_ENV === 'production' ? 'json' : 'text')
@@ -66,6 +71,10 @@ export function loadConfig() {
 
   cachedConfig = Object.freeze(config);
   return cachedConfig;
+}
+
+export function resetConfigCache() {
+  cachedConfig = null;
 }
 
 export function getConfig() {

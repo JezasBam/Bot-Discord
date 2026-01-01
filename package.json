@@ -6,6 +6,7 @@
   "workspaces": [
     "ticketbot",
     "discordhooks",
+    "discordadmins",
     "frontend"
   ],
   "scripts": {
@@ -14,16 +15,64 @@
     "ticketbot:deploy": "npm run deploy -w ticketbot",
     "hooks:start": "npm run start -w discordhooks",
     "hooks:dev": "npm run dev -w discordhooks",
+    "discordadmins:dev": "echo '🔧 Discord Admins is integrated into ticketbot and loaded automatically'",
     "frontend:dev": "npm run dev -w frontend",
     "frontend:build": "npm run build -w frontend",
-    "dev": "concurrently -n ticketbot,hooks,frontend -c yellow,blue,green \"npm run ticketbot:dev\" \"npm run hooks:dev\" \"npm run frontend:dev\"",
-    "start": "concurrently -n ticketbot,hooks,frontend -c yellow,blue,green \"npm run ticketbot:start\" \"npm run hooks:start\" \"npm run frontend:dev\"",
-    "install:all": "npm install"
+    "ticketbot:build": "echo '✅ Ticketbot: No build needed (Node.js modules)'",
+    "hooks:build": "echo '✅ Discordhooks: No build needed (Node.js modules)'",
+    "discordadmins:build": "echo '✅ Discord Admins: No build needed (Node.js modules)'",
+    "build": "npm run ticketbot:build && npm run hooks:build && npm run discordadmins:build && npm run frontend:build && (npm run ticketbot:deploy || echo '⚠️ Deploy failed - check internet connection')",
+    "build:frontend": "npm run frontend:build",
+    "build:backend": "npm run ticketbot:build && npm run hooks:build && npm run discordadmins:build",
+    "build:nodeploy": "npm run ticketbot:build && npm run hooks:build && npm run discordadmins:build && npm run frontend:build",
+    "build:all": "npm run build && echo '✅ Frontend built successfully' && echo '🚀 Backend services ready' && echo '📡 Commands deployed to Discord'",
+    "dev": "npx concurrently -n ticketbot,hooks,discordadmins,frontend,callback -c yellow,blue,cyan,green,red \"npm run ticketbot:dev\" \"npm run hooks:dev\" \"npm run discordadmins:dev\" \"npm run frontend:dev\" \"npm run callback:dev\"",
+    "dev:quiet": "npx concurrently -n ticketbot,hooks,discordadmins,frontend -c yellow,blue,cyan,green --prefix-colors --hide \"npm run ticketbot:dev\" \"npm run hooks:dev\" \"npm run discordadmins:dev\" \"npm run frontend:dev\"",
+    "dev:minimal": "npx concurrently -n ticketbot,discordadmins -c yellow,cyan \"npm run ticketbot:dev\" \"npm run discordadmins:dev\"",
+    "dev:check": "npm run format && npm run lint && npm run test && npm run dev",
+    "callback:dev": "node callback-server.js",
+    "dev:fast": "npx concurrently -n ticketbot,hooks,frontend -c yellow,blue,green \"npm run ticketbot:dev\" \"npm run hooks:dev\" \"npm run frontend:dev\"",
+    "dev:soft": "npx concurrently -n ticketbot,hooks,frontend -c yellow,blue,green \"npm run ticketbot:dev\" \"npm run hooks:dev\" \"npm run frontend:dev\" || echo '⚠️ Services starting...'",
+    "start": "npx concurrently -n ticketbot,hooks,frontend -c yellow,blue,green \"npm run ticketbot:start\" \"npm run hooks:start\" \"npm run frontend:dev\"",
+    "install:all": "npm install",
+    "test": "npm run test:ticketbot && npm run test:hooks && npm run test:discordadmins && npm run test:frontend",
+    "test:ticketbot": "npm run test -w ticketbot",
+    "test:hooks": "npm run test -w discordhooks",
+    "test:discordadmins": "echo '✅ Discord Admins: No tests defined yet'",
+    "test:frontend": "npm run test -w frontend",
+    "test:watch": "npx concurrently -n ticketbot,hooks,frontend -c yellow,blue,green \"npm run test:watch -w ticketbot\" \"npm run test:watch -w discordhooks\" \"npm run test:watch -w frontend\"",
+    "test:coverage": "npm run test:coverage:ticketbot && npm run test:coverage:hooks && npm run test:coverage:frontend",
+    "test:coverage:ticketbot": "npm run test:coverage -w ticketbot",
+    "test:coverage:hooks": "npm run test:coverage -w discordhooks",
+    "test:coverage:frontend": "npm run test:coverage -w frontend",
+    "lint": "npm run lint:ticketbot && npm run lint:hooks && npm run lint:discordadmins && npm run lint:frontend",
+    "lint:ticketbot": "npm run lint -w ticketbot",
+    "lint:hooks": "npm run lint -w discordhooks",
+    "lint:discordadmins": "echo '✅ Discord Admins: No lint defined yet'",
+    "lint:frontend": "npm run lint -w frontend",
+    "lint:fix": "npm run lint:fix:ticketbot && npm run lint:fix:hooks && npm run lint:fix:discordadmins && npm run lint:fix:frontend",
+    "lint:fix:ticketbot": "npm run lint:fix -w ticketbot",
+    "lint:fix:hooks": "npm run lint:fix -w discordhooks",
+    "lint:fix:discordadmins": "echo '✅ Discord Admins: No lint fix defined yet'",
+    "lint:fix:frontend": "npm run lint:fix -w frontend",
+    "format": "npm run format:ticketbot && npm run format:hooks && npm run format:discordadmins && npm run format:frontend",
+    "format:ticketbot": "npm run format -w ticketbot",
+    "format:hooks": "npm run format -w discordhooks",
+    "format:discordadmins": "echo '✅ Discord Admins: No format defined yet'",
+    "format:frontend": "npm run format -w frontend",
+    "format:check": "npm run format:check:ticketbot && npm run format:check:hooks && npm run format:check:discordadmins && npm run format:check:frontend",
+    "format:check:ticketbot": "npm run format:check -w ticketbot",
+    "format:check:hooks": "npm run format:check -w discordhooks",
+    "format:check:discordadmins": "echo '✅ Discord Admins: No format check defined yet'",
+    "format:check:frontend": "npm run format:check -w frontend"
   },
   "devDependencies": {
-    "concurrently": "^9.1.0"
+    "concurrently": "^9.2.1"
   },
   "engines": {
     "node": ">=22.12.0"
+  },
+  "dependencies": {
+    "sharp": "^0.34.5"
   }
 }

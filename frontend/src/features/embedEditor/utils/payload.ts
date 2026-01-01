@@ -1,18 +1,19 @@
-import type { WebhookPayload, Embed } from '../types';
+import type { WebhookPayload, Embed } from "../types";
 
 export function createEmptyPayload(): WebhookPayload {
   return {
-    content: '',
-    username: '',
-    avatar_url: '',
+    content: "",
+    username: "",
+    avatar_url: "",
     embeds: [],
   };
 }
 
 export function createEmptyEmbed(): Embed {
   return {
-    title: '',
-    description: '',
+    id: crypto.randomUUID(),
+    title: "",
+    description: "",
     color: 5793266, // Discord blurple as default
     fields: [],
   };
@@ -34,7 +35,9 @@ export function cleanPayloadForExport(payload: WebhookPayload): WebhookPayload {
   }
 
   cleaned.embeds = payload.embeds.map((embed) => {
-    const cleanedEmbed: Embed = {};
+    const cleanedEmbed: Embed = {
+      id: embed.id, // Preserve the ID for React key stability
+    };
 
     if (embed.title?.trim()) cleanedEmbed.title = embed.title;
     if (embed.description?.trim()) cleanedEmbed.description = embed.description;
@@ -45,12 +48,14 @@ export function cleanPayloadForExport(payload: WebhookPayload): WebhookPayload {
     if (embed.author?.name?.trim()) {
       cleanedEmbed.author = { name: embed.author.name };
       if (embed.author.url?.trim()) cleanedEmbed.author.url = embed.author.url;
-      if (embed.author.icon_url?.trim()) cleanedEmbed.author.icon_url = embed.author.icon_url;
+      if (embed.author.icon_url?.trim())
+        cleanedEmbed.author.icon_url = embed.author.icon_url;
     }
 
     if (embed.footer?.text?.trim()) {
       cleanedEmbed.footer = { text: embed.footer.text };
-      if (embed.footer.icon_url?.trim()) cleanedEmbed.footer.icon_url = embed.footer.icon_url;
+      if (embed.footer.icon_url?.trim())
+        cleanedEmbed.footer.icon_url = embed.footer.icon_url;
     }
 
     if (embed.image?.url?.trim()) {
@@ -63,7 +68,7 @@ export function cleanPayloadForExport(payload: WebhookPayload): WebhookPayload {
 
     if (embed.fields && embed.fields.length > 0) {
       cleanedEmbed.fields = embed.fields.filter(
-        (f) => f.name?.trim() && f.value?.trim()
+        (f) => f.name?.trim() && f.value?.trim(),
       );
     }
 

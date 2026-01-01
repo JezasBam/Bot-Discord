@@ -1,6 +1,6 @@
 interface ColorPickerProps {
-  color: number;
-  onChange: (color: number) => void;
+  _color: number;
+  onChange: (_color: number) => void;
 }
 
 const PRESET_COLORS = [
@@ -15,27 +15,27 @@ const PRESET_COLORS = [
 ];
 
 function numberToHex(num: number): string {
-  return '#' + num.toString(16).padStart(6, '0');
+  return "#" + num.toString(16).padStart(6, "0");
 }
 
 function hexToNumber(hex: string): number {
-  return parseInt(hex.replace('#', ''), 16);
+  return parseInt(hex.replace("#", ""), 16);
 }
 
-export function ColorPicker({ color, onChange }: ColorPickerProps) {
+export function ColorPicker({ _color, onChange }: ColorPickerProps) {
   return (
     <div className="space-y-2">
       <label className="label">Embed Color</label>
       <div className="flex items-center gap-3">
         <input
           type="color"
-          value={numberToHex(color)}
+          value={numberToHex(_color)}
           onChange={(e) => onChange(hexToNumber(e.target.value))}
           className="w-10 h-10 rounded cursor-pointer border-0 bg-transparent"
         />
         <input
           type="text"
-          value={numberToHex(color)}
+          value={numberToHex(_color)}
           onChange={(e) => {
             const val = e.target.value;
             if (/^#[0-9A-Fa-f]{6}$/.test(val)) {

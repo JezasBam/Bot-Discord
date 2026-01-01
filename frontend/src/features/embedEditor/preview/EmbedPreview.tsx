@@ -1,35 +1,20 @@
-import { useEffect, useState, type ReactNode } from 'react';
-import { Copy, Check } from 'lucide-react';
-import type { WebhookPayload, Embed } from '../types';
-import { api, type BotInfo } from '@/api/client';
+import { useState, type ReactNode } from "react";
+import { Copy, Check } from "lucide-react";
+import type { WebhookPayload, Embed } from "../types";
+import { type BotInfo } from "@/api/client";
 
 interface EmbedPreviewProps {
   payload: WebhookPayload;
+  botInfo: BotInfo | null;
 }
 
-export function EmbedPreview({ payload }: EmbedPreviewProps) {
+export function EmbedPreview({ payload, botInfo }: EmbedPreviewProps) {
   const hasContent = payload.content?.trim();
   const hasEmbeds = payload.embeds.length > 0;
   const [copied, setCopied] = useState(false);
-  const [botInfo, setBotInfo] = useState<BotInfo | null>(null);
 
-  useEffect(() => {
-    let cancelled = false;
-    api
-      .bot()
-      .then((data) => {
-        if (!cancelled) setBotInfo(data);
-      })
-      .catch(() => {
-        // ignore
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
-  const displayName = botInfo?.user?.username ?? 'Bot';
-  const avatarUrl = botInfo?.user?.avatarUrl ?? '';
+  const displayName = botInfo?.user?.username ?? "Bot";
+  const avatarUrl = botInfo?.user?.avatarUrl ?? "";
 
   const handleCopyJson = async () => {
     try {
@@ -63,7 +48,7 @@ export function EmbedPreview({ payload }: EmbedPreviewProps) {
             title="Copy payload JSON"
           >
             {copied ? <Check size={14} /> : <Copy size={14} />}
-            {copied ? 'Copied' : 'Copy JSON'}
+            {copied ? "Copied" : "Copy JSON"}
           </button>
         </div>
       </div>
@@ -79,7 +64,7 @@ export function EmbedPreview({ payload }: EmbedPreviewProps) {
               className="w-10 h-10 rounded-full"
               onError={(e) => {
                 (e.target as HTMLImageElement).src =
-                  'https://cdn.discordapp.com/embed/avatars/0.png';
+                  "https://cdn.discordapp.com/embed/avatars/0.png";
               }}
             />
           ) : (
@@ -96,13 +81,15 @@ export function EmbedPreview({ payload }: EmbedPreviewProps) {
             <span className="font-medium text-discord-text hover:underline cursor-pointer">
               {displayName}
             </span>
-            <span className="text-xs text-discord-muted">Today at 12:00 PM</span>
+            <span className="text-xs text-discord-muted">
+              Today at 12:00 PM
+            </span>
           </div>
 
           {/* Message content */}
           {hasContent && (
             <p className="text-discord-text whitespace-pre-wrap break-words mb-2">
-              {renderDiscordInlineMarkdown(payload.content ?? '')}
+              {renderDiscordInlineMarkdown(payload.content ?? "")}
             </p>
           )}
 
@@ -117,7 +104,9 @@ export function EmbedPreview({ payload }: EmbedPreviewProps) {
 }
 
 function EmbedCard({ embed }: { embed: Embed }) {
-  const borderColor = embed.color ? `#${embed.color.toString(16).padStart(6, '0')}` : '#202225';
+  const borderColor = embed.color
+    ? `#${embed.color.toString(16).padStart(6, "0")}`
+    : "#202225";
 
   return (
     <div
@@ -165,7 +154,9 @@ function EmbedCard({ embed }: { embed: Embed }) {
                 {renderDiscordInlineMarkdown(embed.title)}
               </a>
             ) : (
-              <span className="font-semibold text-discord-text">{renderDiscordInlineMarkdown(embed.title)}</span>
+              <span className="font-semibold text-discord-text">
+                {renderDiscordInlineMarkdown(embed.title)}
+              </span>
             )}
           </div>
         )}
@@ -179,12 +170,14 @@ function EmbedCard({ embed }: { embed: Embed }) {
 
         {/* Fields */}
         {embed.fields && embed.fields.length > 0 && (
-          <div className="grid gap-2 mt-2" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))' }}>
+          <div
+            className="grid gap-2 mt-2"
+            style={{
+              gridTemplateColumns: "repeat(auto-fill, minmax(150px, 1fr))",
+            }}
+          >
             {embed.fields.map((field, index) => (
-              <div
-                key={index}
-                className={field.inline ? '' : 'col-span-full'}
-              >
+              <div key={index} className={field.inline ? "" : "col-span-full"}>
                 <div className="text-sm font-semibold text-discord-text">
                   {renderDiscordInlineMarkdown(field.name)}
                 </div>
@@ -203,7 +196,7 @@ function EmbedCard({ embed }: { embed: Embed }) {
             alt=""
             className="max-w-full rounded mt-4"
             onError={(e) => {
-              (e.target as HTMLImageElement).style.display = 'none';
+              (e.target as HTMLImageElement).style.display = "none";
             }}
           />
         )}
@@ -215,7 +208,7 @@ function EmbedCard({ embed }: { embed: Embed }) {
             alt=""
             className="max-w-[80px] max-h-[80px] rounded mt-2"
             onError={(e) => {
-              (e.target as HTMLImageElement).style.display = 'none';
+              (e.target as HTMLImageElement).style.display = "none";
             }}
           />
         )}
@@ -230,7 +223,9 @@ function EmbedCard({ embed }: { embed: Embed }) {
                 className="w-5 h-5 rounded-full"
               />
             )}
-            {embed.footer?.text && <span>{renderDiscordInlineMarkdown(embed.footer.text)}</span>}
+            {embed.footer?.text && (
+              <span>{renderDiscordInlineMarkdown(embed.footer.text)}</span>
+            )}
             {embed.footer?.text && embed.timestamp && <span>•</span>}
             {embed.timestamp && (
               <span>{new Date(embed.timestamp).toLocaleDateString()}</span>
@@ -255,12 +250,12 @@ function parseInline(text: string): ReactNode[] {
     const out: ReactNode[] = [];
     let i = 0;
     while (i < input.length) {
-      const start = input.indexOf('`', i);
+      const start = input.indexOf("`", i);
       if (start === -1) {
         out.push(...splitFormatting(input.slice(i)));
         break;
       }
-      const end = input.indexOf('`', start + 1);
+      const end = input.indexOf("`", start + 1);
       if (end === -1) {
         out.push(...splitFormatting(input.slice(i)));
         break;
@@ -272,16 +267,19 @@ function parseInline(text: string): ReactNode[] {
 
       const code = input.slice(start + 1, end);
       out.push(
-        <code key={nextKey()} className="px-1 rounded bg-discord-bg text-discord-text">
+        <code
+          key={nextKey()}
+          className="px-1 rounded bg-discord-bg text-discord-text"
+        >
           {code}
-        </code>
+        </code>,
       );
       i = end + 1;
     }
     return out;
   };
 
-  const delimiters = ['***', '**', '__', '~~', '*', '_'] as const;
+  const delimiters = ["***", "**", "__", "~~", "*", "_"] as const;
 
   const findNextDelimiter = (input: string) => {
     let bestIndex = -1;
@@ -290,7 +288,11 @@ function parseInline(text: string): ReactNode[] {
     for (const d of delimiters) {
       const idx = input.indexOf(d);
       if (idx === -1) continue;
-      if (bestIndex === -1 || idx < bestIndex || (idx === bestIndex && d.length > (bestDelim?.length ?? 0))) {
+      if (
+        bestIndex === -1 ||
+        idx < bestIndex ||
+        (idx === bestIndex && d.length > (bestDelim?.length ?? 0))
+      ) {
         bestIndex = idx;
         bestDelim = d;
       }
@@ -300,18 +302,18 @@ function parseInline(text: string): ReactNode[] {
 
   const wrap = (delim: string, children: ReactNode[]) => {
     const keyProp = nextKey();
-    if (delim === '***') {
+    if (delim === "***") {
       return (
         <strong key={keyProp}>
           <em>{children}</em>
         </strong>
       );
     }
-    if (delim === '**') return <strong key={keyProp}>{children}</strong>;
-    if (delim === '*') return <em key={keyProp}>{children}</em>;
-    if (delim === '_') return <em key={keyProp}>{children}</em>;
-    if (delim === '__') return <u key={keyProp}>{children}</u>;
-    if (delim === '~~') return <s key={keyProp}>{children}</s>;
+    if (delim === "**") return <strong key={keyProp}>{children}</strong>;
+    if (delim === "*") return <em key={keyProp}>{children}</em>;
+    if (delim === "_") return <em key={keyProp}>{children}</em>;
+    if (delim === "__") return <u key={keyProp}>{children}</u>;
+    if (delim === "~~") return <s key={keyProp}>{children}</s>;
     return <span key={keyProp}>{children}</span>;
   };
 

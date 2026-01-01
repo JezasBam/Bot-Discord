@@ -1,16 +1,18 @@
-import { db } from './db';
-import type { EmbedProject, ProjectUpdate } from '../types';
-import { createEmptyPayload } from '@/features/embedEditor/utils/payload';
+import { db } from "./db";
+import type { EmbedProject, ProjectUpdate } from "../types";
+import { createEmptyPayload } from "@/features/embedEditor/utils/payload";
 
 function generateId(): string {
   return crypto.randomUUID();
 }
 
 export async function getAllProjects(): Promise<EmbedProject[]> {
-  return db.projects.orderBy('updatedAt').reverse().toArray();
+  return db.projects.orderBy("updatedAt").reverse().toArray();
 }
 
-export async function getProjectById(id: string): Promise<EmbedProject | undefined> {
+export async function getProjectById(
+  id: string,
+): Promise<EmbedProject | undefined> {
   return db.projects.get(id);
 }
 
@@ -28,7 +30,10 @@ export async function createProject(name: string): Promise<EmbedProject> {
   return project;
 }
 
-export async function updateProject(id: string, updates: ProjectUpdate): Promise<void> {
+export async function updateProject(
+  id: string,
+  updates: ProjectUpdate,
+): Promise<void> {
   await db.projects.update(id, {
     ...updates,
     updatedAt: Date.now(),
@@ -39,7 +44,9 @@ export async function deleteProject(id: string): Promise<void> {
   await db.projects.delete(id);
 }
 
-export async function duplicateProject(id: string): Promise<EmbedProject | null> {
+export async function duplicateProject(
+  id: string,
+): Promise<EmbedProject | null> {
   const original = await getProjectById(id);
   if (!original) return null;
 

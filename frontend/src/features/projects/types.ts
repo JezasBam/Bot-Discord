@@ -1,4 +1,4 @@
-import type { WebhookPayload } from '../embedEditor/types';
+import type { WebhookPayload } from "../embedEditor/types";
 
 export interface EmbedProject {
   id: string;
@@ -8,4 +8,4 @@ export interface EmbedProject {
   payload: WebhookPayload;
 }
 
-export type ProjectUpdate = Partial<Pick<EmbedProject, 'name' | 'payload'>>;
+export type ProjectUpdate = Partial<Pick<EmbedProject, "name" | "payload">>;

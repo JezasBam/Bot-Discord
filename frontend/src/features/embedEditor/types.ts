@@ -24,6 +24,7 @@ export interface EmbedThumbnail {
 }
 
 export interface Embed {
+  id: string; // UUID for React key stability
   title?: string;
   description?: string;
   url?: string;

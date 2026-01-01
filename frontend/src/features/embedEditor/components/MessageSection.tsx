@@ -1,13 +1,13 @@
-import { DISCORD_LIMITS } from '../types';
+import { DISCORD_LIMITS } from "../types";
 
 interface MessageSectionProps {
   content: string;
   username: string;
   avatarUrl: string;
-  onContentChange: (value: string) => void;
-  onUsernameChange: (value: string) => void;
-  onAvatarChange: (value: string) => void;
-  variant?: 'card' | 'plain';
+  onContentChange: (_value: string) => void;
+  onUsernameChange: (_value: string) => void;
+  onAvatarChange: (_value: string) => void;
+  variant?: "card" | "plain";
 }
 
 export function MessageSection({
@@ -17,10 +17,12 @@ export function MessageSection({
   onContentChange,
   onUsernameChange,
   onAvatarChange,
-  variant = 'card',
+  variant = "card",
 }: MessageSectionProps) {
   const wrapperClassName =
-    variant === 'plain' ? 'space-y-4' : 'bg-discord-dark rounded-lg p-4 space-y-4';
+    variant === "plain"
+      ? "space-y-4"
+      : "bg-discord-dark rounded-lg p-4 space-y-4";
 
   return (
     <section className={wrapperClassName}>
@@ -40,7 +42,7 @@ export function MessageSection({
           maxLength={DISCORD_LIMITS.CONTENT_MAX}
           rows={4}
           className="input resize-y"
-          placeholder="Message content..."
+          placeholder="Message content (ex: 'Hello @everyone!')"
         />
       </div>
 
@@ -54,7 +56,7 @@ export function MessageSection({
             onChange={(e) => onUsernameChange(e.target.value)}
             maxLength={DISCORD_LIMITS.USERNAME_MAX}
             className="input"
-            placeholder="Webhook name"
+            placeholder="Webhook name (ex: 'Server Bot', 'Announcements')"
           />
         </div>
         <div>
@@ -64,7 +66,7 @@ export function MessageSection({
             value={avatarUrl}
             onChange={(e) => onAvatarChange(e.target.value)}
             className="input"
-            placeholder="https://..."
+            placeholder="https://example.com/avatar.png (or leave empty for default)"
           />
         </div>
       </div>

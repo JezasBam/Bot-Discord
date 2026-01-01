@@ -1,15 +1,17 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect } from "react";
 
-const STORAGE_KEY = 'embed-builder:currentProjectId';
+const STORAGE_KEY = "embed-builder:currentProjectId";
 
 export function useCurrentProject() {
-  const [currentProjectId, setCurrentProjectIdState] = useState<string | null>(() => {
-    try {
-      return localStorage.getItem(STORAGE_KEY);
-    } catch {
-      return null;
-    }
-  });
+  const [currentProjectId, setCurrentProjectIdState] = useState<string | null>(
+    () => {
+      try {
+        return localStorage.getItem(STORAGE_KEY);
+      } catch {
+        return null;
+      }
+    },
+  );
 
   useEffect(() => {
     try {

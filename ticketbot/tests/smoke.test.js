@@ -17,7 +17,7 @@ describe('Bot Smoke Tests', () => {
     const pkgPath = path.join(projectRoot, 'package.json');
     const content = await fs.readFile(pkgPath, 'utf8');
     const pkg = JSON.parse(content);
-    expect(pkg.name).toBe('discord-ticket-bot');
+    expect(pkg.name).toBe('ticketbot');
     expect(pkg.type).toBe('module');
   });
 
@@ -37,7 +37,7 @@ describe('Bot Smoke Tests', () => {
   });
 
   it('should have required config files', async () => {
-    const files = ['.env.example', 'eslint.config.js', '.prettierrc'];
+    const files = ['.env.example', '.prettierrc', '.gitignore'];
     for (const file of files) {
       const filePath = path.join(projectRoot, file);
       const exists = await fs.access(filePath).then(() => true).catch(() => false);

@@ -1,70 +1,88 @@
-import { useMemo, useState, useEffect } from 'react';
-import { Plus, Trash2, GripVertical, ChevronDown, ChevronUp, Copy } from 'lucide-react';
-import type { EmbedField } from '../types';
-import { DISCORD_LIMITS } from '../types';
+import { useMemo, useState, useEffect } from "react";
+import {
+  Plus,
+  Trash2,
+  GripVertical,
+  ChevronDown,
+  ChevronUp,
+  Copy,
+} from "lucide-react";
+import type { EmbedField } from "../types";
+import { DISCORD_LIMITS } from "../types";
 
 interface EmbedFieldsEditorProps {
-  fields: EmbedField[];
-  onChange: (fields: EmbedField[]) => void;
+  _fields: EmbedField[];
+  onChange: (_fields: EmbedField[]) => void;
 }
 
-export function EmbedFieldsEditor({ fields, onChange }: EmbedFieldsEditorProps) {
+export function EmbedFieldsEditor({
+  _fields,
+  onChange,
+}: EmbedFieldsEditorProps) {
   const [expanded, setExpanded] = useState<Record<number, boolean>>({});
 
   useEffect(() => {
     // Keep expanded map in sync with current indices.
     setExpanded((prev) => {
       const next: Record<number, boolean> = {};
-      for (let i = 0; i < fields.length; i++) {
-        next[i] = prev[i] ?? (fields.length <= 2);
+      for (let i = 0; i < _fields.length; i++) {
+        next[i] = prev[i] ?? _fields.length <= 2;
       }
       return next;
     });
-  }, [fields.length]);
+  }, [_fields.length]);
 
   const toggleField = (index: number) => {
     setExpanded((prev) => ({ ...prev, [index]: !(prev[index] ?? true) }));
   };
 
   const handleAddField = () => {
-    if (fields.length >= DISCORD_LIMITS.EMBED_FIELDS_MAX) return;
-    onChange([...fields, { name: '', value: '', inline: false }]);
-    setExpanded((prev) => ({ ...prev, [fields.length]: true }));
+    if (_fields.length >= DISCORD_LIMITS.EMBED_FIELDS_MAX) return;
+    onChange([..._fields, { name: "", value: "", inline: false }]);
+    setExpanded((prev) => ({ ...prev, [_fields.length]: true }));
   };
 
   const handleRemoveField = (index: number) => {
-    onChange(fields.filter((_, i) => i !== index));
+    onChange(_fields.filter((_, i) => i !== index));
   };
 
   const handleDuplicateField = (index: number) => {
-    if (fields.length >= DISCORD_LIMITS.EMBED_FIELDS_MAX) return;
+    if (_fields.length >= DISCORD_LIMITS.EMBED_FIELDS_MAX) return;
     const copy: EmbedField = {
-      name: fields[index]?.name ?? '',
-      value: fields[index]?.value ?? '',
-      inline: fields[index]?.inline ?? false,
+      name: _fields[index]?.name ?? "",
+      value: _fields[index]?.value ?? "",
+      inline: _fields[index]?.inline ?? false,
     };
-    const next = [...fields.slice(0, index + 1), copy, ...fields.slice(index + 1)];
+    const next = [
+      ..._fields.slice(0, index + 1),
+      copy,
+      ..._fields.slice(index + 1),
+    ];
     onChange(next);
     setExpanded((prev) => ({ ...prev, [index + 1]: true }));
   };
 
-  const handleFieldChange = (index: number, key: keyof EmbedField, value: string | boolean) => {
-    const newFields = [...fields];
+  const handleFieldChange = (
+    index: number,
+    key: keyof EmbedField,
+    value: string | boolean,
+  ) => {
+    const newFields = [..._fields];
     newFields[index] = { ...newFields[index]!, [key]: value };
     onChange(newFields);
   };
 
-  const fieldsLabel = useMemo(() => {
-    return `Fields (${fields.length}/${DISCORD_LIMITS.EMBED_FIELDS_MAX})`;
-  }, [fields.length]);
+  const _fieldsLabel = useMemo(() => {
+    return `Fields (${_fields.length}/${DISCORD_LIMITS.EMBED_FIELDS_MAX})`;
+  }, [_fields.length]);
 
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
-        <label className="label mb-0">{fieldsLabel}</label>
+        <label className="label mb-0">{_fieldsLabel}</label>
         <button
           onClick={handleAddField}
-          disabled={fields.length >= DISCORD_LIMITS.EMBED_FIELDS_MAX}
+          disabled={_fields.length >= DISCORD_LIMITS.EMBED_FIELDS_MAX}
           className="btn btn-secondary py-1 px-2 text-sm flex items-center gap-1"
         >
           <Plus size={14} />
@@ -72,30 +90,47 @@ export function EmbedFieldsEditor({ fields, onChange }: EmbedFieldsEditorProps) 
         </button>
       </div>
 
-      {fields.length === 0 ? (
-        <p className="text-discord-muted text-sm">No fields added yet.</p>
+      {_fields.length === 0 ? (
+        <p className="text-discord-muted text-sm">No _fields added yet.</p>
       ) : (
         <div className="space-y-2">
-          {fields.map((field, index) => (
-            <div key={index} className="bg-discord-darker rounded overflow-hidden">
+          {_fields.map((field, index) => (
+            <div
+              key={index}
+              className="bg-discord-darker rounded overflow-hidden"
+            >
               <button
                 type="button"
                 className="w-full flex items-center justify-between px-3 py-2 text-left hover:bg-discord-light"
                 onClick={() => toggleField(index)}
               >
                 <div className="flex items-center gap-2 min-w-0">
-                  {expanded[index] ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                  {expanded[index] ? (
+                    <ChevronUp size={16} />
+                  ) : (
+                    <ChevronDown size={16} />
+                  )}
                   <span className="font-medium truncate">
                     Field {index + 1}
-                    {field.name?.trim() ? <span className="text-discord-muted"> — {field.name}</span> : null}
+                    {field.name?.trim() ? (
+                      <span className="text-discord-muted">
+                        {" "}
+                        — {field.name}
+                      </span>
+                    ) : null}
                   </span>
                 </div>
-                <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
+                <div
+                  className="flex items-center gap-2"
+                  onClick={(e) => e.stopPropagation()}
+                >
                   <label className="flex items-center gap-2 text-sm text-discord-muted whitespace-nowrap">
                     <input
                       type="checkbox"
                       checked={field.inline ?? false}
-                      onChange={(e) => handleFieldChange(index, 'inline', e.target.checked)}
+                      onChange={(e) =>
+                        handleFieldChange(index, "inline", e.target.checked)
+                      }
                       className="rounded"
                     />
                     Inline
@@ -103,7 +138,7 @@ export function EmbedFieldsEditor({ fields, onChange }: EmbedFieldsEditorProps) 
                   <button
                     type="button"
                     onClick={() => handleDuplicateField(index)}
-                    disabled={fields.length >= DISCORD_LIMITS.EMBED_FIELDS_MAX}
+                    disabled={_fields.length >= DISCORD_LIMITS.EMBED_FIELDS_MAX}
                     className="p-1.5 hover:bg-discord-light rounded disabled:opacity-40"
                     title="Duplicate field"
                   >
@@ -120,22 +155,32 @@ export function EmbedFieldsEditor({ fields, onChange }: EmbedFieldsEditorProps) 
                 </div>
               </button>
 
-              <div className={expanded[index] ? 'px-3 pb-3 space-y-3' : 'hidden'}>
+              <div
+                className={expanded[index] ? "px-3 pb-3 space-y-3" : "hidden"}
+              >
                 <div className="flex items-start gap-2">
-                  <GripVertical size={16} className="text-discord-muted mt-2 cursor-grab" />
+                  <GripVertical
+                    size={16}
+                    className="text-discord-muted mt-2 cursor-grab"
+                  />
                   <div className="flex-1 space-y-3">
                     <div>
                       <label className="label">
                         Name
-                        <span className="text-discord-muted ml-2 italic">Required</span>
+                        <span className="text-discord-muted ml-2 italic">
+                          Required
+                        </span>
                         <span className="text-discord-muted ml-2">
-                          {(field.name ?? '').length}/{DISCORD_LIMITS.EMBED_FIELD_NAME_MAX}
+                          {(field.name ?? "").length}/
+                          {DISCORD_LIMITS.EMBED_FIELD_NAME_MAX}
                         </span>
                       </label>
                       <input
                         type="text"
                         value={field.name}
-                        onChange={(e) => handleFieldChange(index, 'name', e.target.value)}
+                        onChange={(e) =>
+                          handleFieldChange(index, "name", e.target.value)
+                        }
                         className="input text-sm"
                         placeholder="Field name"
                         maxLength={DISCORD_LIMITS.EMBED_FIELD_NAME_MAX}
@@ -145,14 +190,19 @@ export function EmbedFieldsEditor({ fields, onChange }: EmbedFieldsEditorProps) 
                     <div>
                       <label className="label">
                         Value
-                        <span className="text-discord-muted ml-2 italic">Required</span>
+                        <span className="text-discord-muted ml-2 italic">
+                          Required
+                        </span>
                         <span className="text-discord-muted ml-2">
-                          {(field.value ?? '').length}/{DISCORD_LIMITS.EMBED_FIELD_VALUE_MAX}
+                          {(field.value ?? "").length}/
+                          {DISCORD_LIMITS.EMBED_FIELD_VALUE_MAX}
                         </span>
                       </label>
                       <textarea
                         value={field.value}
-                        onChange={(e) => handleFieldChange(index, 'value', e.target.value)}
+                        onChange={(e) =>
+                          handleFieldChange(index, "value", e.target.value)
+                        }
                         className="input text-sm resize-y"
                         placeholder="Field value"
                         maxLength={DISCORD_LIMITS.EMBED_FIELD_VALUE_MAX}

@@ -1,5 +1,5 @@
-import { useEffect, useRef, useState, type ReactNode } from 'react';
-import { PanelLeftClose, PanelLeftOpen } from 'lucide-react';
+import { useEffect, useRef, useState, type ReactNode } from "react";
+import { PanelLeftClose, PanelLeftOpen } from "lucide-react";
 
 interface LayoutProps {
   sidebar: ReactNode;
@@ -9,10 +9,10 @@ interface LayoutProps {
 
 function readStoredBool(key: string, fallback: boolean) {
   try {
-    if (typeof window === 'undefined') return fallback;
+    if (typeof window === "undefined") return fallback;
     const raw = window.localStorage.getItem(key);
     if (raw == null) return fallback;
-    return raw === '1' || raw === 'true';
+    return raw === "1" || raw === "true";
   } catch {
     return fallback;
   }
@@ -20,7 +20,7 @@ function readStoredBool(key: string, fallback: boolean) {
 
 function readStoredNumber(key: string, fallback: number) {
   try {
-    if (typeof window === 'undefined') return fallback;
+    if (typeof window === "undefined") return fallback;
     const raw = window.localStorage.getItem(key);
     if (raw == null) return fallback;
     const parsed = Number(raw);
@@ -35,23 +35,30 @@ function clamp(n: number, min: number, max: number) {
 }
 
 export function Layout({ sidebar, editor, preview }: LayoutProps) {
-  const [sidebarHidden, setSidebarHidden] = useState(() => readStoredBool('layout.sidebarHidden', false));
+  const [sidebarHidden, setSidebarHidden] = useState(() =>
+    readStoredBool("layout.sidebarHidden", false),
+  );
   const [previewWidth, setPreviewWidth] = useState(() =>
-    readStoredNumber('layout.previewWidth', 560)
+    readStoredNumber("layout.previewWidth", 560),
   );
   const resizeRef = useRef<{ startX: number; startW: number } | null>(null);
 
   useEffect(() => {
     try {
-      window.localStorage.setItem('layout.sidebarHidden', sidebarHidden ? '1' : '0');
+      window.localStorage.setItem(
+        "layout.sidebarHidden",
+        sidebarHidden ? "1" : "0",
+      );
     } catch {
+      // Ignore localStorage errors
     }
   }, [sidebarHidden]);
 
   useEffect(() => {
     try {
-      window.localStorage.setItem('layout.previewWidth', String(previewWidth));
+      window.localStorage.setItem("layout.previewWidth", String(previewWidth));
     } catch {
+      // Ignore localStorage errors
     }
   }, [previewWidth]);
 
@@ -67,13 +74,13 @@ export function Layout({ sidebar, editor, preview }: LayoutProps) {
       resizeRef.current = null;
     };
 
-    window.addEventListener('pointermove', handleMove);
-    window.addEventListener('pointerup', handleUp);
-    window.addEventListener('pointercancel', handleUp);
+    window.addEventListener("pointermove", handleMove);
+    window.addEventListener("pointerup", handleUp);
+    window.addEventListener("pointercancel", handleUp);
     return () => {
-      window.removeEventListener('pointermove', handleMove);
-      window.removeEventListener('pointerup', handleUp);
-      window.removeEventListener('pointercancel', handleUp);
+      window.removeEventListener("pointermove", handleMove);
+      window.removeEventListener("pointerup", handleUp);
+      window.removeEventListener("pointercancel", handleUp);
     };
   }, []);
 
@@ -85,12 +92,18 @@ export function Layout({ sidebar, editor, preview }: LayoutProps) {
             type="button"
             onClick={() => setSidebarHidden((v) => !v)}
             className="h-8 px-2 rounded bg-discord-lighter border border-discord-light hover:bg-discord-light text-discord-text flex items-center gap-2"
-            title={sidebarHidden ? 'Show Discord panel' : 'Hide Discord panel'}
+            title={sidebarHidden ? "Show Discord panel" : "Hide Discord panel"}
           >
-            {sidebarHidden ? <PanelLeftOpen size={16} /> : <PanelLeftClose size={16} />}
+            {sidebarHidden ? (
+              <PanelLeftOpen size={16} />
+            ) : (
+              <PanelLeftClose size={16} />
+            )}
             <span className="text-sm">Discord Panel</span>
           </button>
-          <span className="text-sm text-discord-muted truncate">Embed Builder</span>
+          <span className="text-sm text-discord-muted truncate">
+            Embed Builder
+          </span>
         </div>
       </header>
 
@@ -98,7 +111,9 @@ export function Layout({ sidebar, editor, preview }: LayoutProps) {
         {/* Sidebar - Projects */}
         <aside
           className={`flex-shrink-0 bg-discord-dark overflow-hidden transition-all duration-200 ${
-            sidebarHidden ? 'w-0 border-r-0' : 'w-64 border-r border-discord-light'
+            sidebarHidden
+              ? "w-0 border-r-0"
+              : "w-64 border-r border-discord-light"
           }`}
         >
           {!sidebarHidden && <div className="h-full">{sidebar}</div>}
@@ -115,7 +130,9 @@ export function Layout({ sidebar, editor, preview }: LayoutProps) {
             aria-orientation="vertical"
             onPointerDown={(e) => {
               resizeRef.current = { startX: e.clientX, startW: previewWidth };
-              (e.currentTarget as HTMLDivElement).setPointerCapture(e.pointerId);
+              (e.currentTarget as HTMLDivElement).setPointerCapture(
+                e.pointerId,
+              );
             }}
             className="w-1 cursor-col-resize bg-discord-light/40 hover:bg-discord-light"
             title="Drag to resize preview"

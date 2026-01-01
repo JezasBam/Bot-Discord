@@ -1,7 +1,7 @@
 import { ChannelType, ThreadAutoArchiveDuration } from 'discord.js';
 import { t } from './i18n.js';
 import { buildCreateTicketModal, buildCloseTicketModal } from './ui/modals.js';
-import { buildJoinButtonRow, buildDisabledJoinButtonRow, buildCloseButtonRow } from './ui/buttons.js';
+import { buildJoinButtonRow, buildDisabledJoinButtonRow, buildCloseButtonRow, buildSupportCloseButtonRow, buildJoinAndCloseButtonRow, buildDisabledJoinAndCloseButtonRow } from './ui/buttons.js';
 import {
   buildWaitingEmbed,
   buildNewTicketLogEmbed,
@@ -37,6 +37,22 @@ import {
 import { getLogger } from '../../core/logger.js';
 
 const logger = getLogger();
+
+// Helper function for interaction replies with timeout handling
+async function safeInteractionReply(interaction, options) {
+  try {
+    await interaction.reply(options);
+  } catch (err) {
+    // Handle interaction timeout gracefully
+    if (err.code === 10062) {
+      // Unknown interaction - interaction expired, this is normal
+      logger.debug('Interaction expired:', interaction.id);
+      return;
+    }
+    // Re-throw other errors
+    throw err;
+  }
+}
 
 const openCooldown = new Map();
 let cooldownCleanupInterval = null;
@@ -95,6 +111,59 @@ async function sendFilesInBatches(channel, firstMessage, files, options = {}) {
   }
 }
 
+/**
+ * Asigură că tag-ul Support există în forum
+ */
+async function ensureSupportTag(forumChannel) {
+  try {
+    // Verificăm dacă tag-ul Support există deja (cu sau fără bulină)
+    const existingTag = forumChannel.availableTags.find(tag => 
+      tag.name.toLowerCase() === 'support' || tag.name.toLowerCase() === '🟠 support'
+    );
+    
+    if (existingTag) {
+      logger.info('Support tag already exists in forum');
+      return existingTag;
+    }
+    
+    // Verificăm dacă există tag-uri vechi fără bulină și le eliminăm
+    const oldSupportTag = forumChannel.availableTags.find(tag => 
+      tag.name === 'Support'
+    );
+    
+    if (oldSupportTag) {
+      // Eliminăm tag-ul vechi și creăm cel nou
+      const newTags = forumChannel.availableTags.filter(tag => tag.name !== 'Support');
+      newTags.push({
+        name: '🟠 Support'
+      });
+      
+      await forumChannel.setAvailableTags(newTags);
+      logger.info('Replaced old Support tag with new one with bullet');
+      
+      return forumChannel.availableTags.find(tag => tag.name === '🟠 Support');
+    }
+    
+    // Adăugăm tag-ul Support cu bulină dacă nu există
+    const newTags = [
+      ...forumChannel.availableTags,
+      {
+        name: '🟠 Support'
+      }
+    ];
+    
+    await forumChannel.setAvailableTags(newTags);
+    logger.info('Successfully added Support tag to forum');
+    
+    // Returnăm tag-ul nou creat
+    return forumChannel.availableTags.find(tag => tag.name === '🟠 Support');
+    
+  } catch (error) {
+    logger.error('Failed to ensure Support tag:', error);
+    return null;
+  }
+}
+
 export async function handleTicketButton(interaction, _context = {}) {
   if (!interaction.inGuild() || !interaction.guild) return;
 
@@ -103,6 +172,17 @@ export async function handleTicketButton(interaction, _context = {}) {
 
   if (id === 'ticket_close') {
     await showCloseModal(interaction);
+    return;
+  }
+
+  if (id === 'ticket_support_close') {
+    await handleSupportClose(interaction);
+    return;
+  }
+
+  if (id.startsWith('ticket_forum_close_')) {
+    const threadId = id.slice('ticket_forum_close_'.length);
+    await handleForumClose(interaction, threadId);
     return;
   }
 
@@ -137,7 +217,7 @@ export async function handleTicketModalSubmit(interaction, _context = {}) {
   const description = interaction.fields.getTextInputValue('description')?.trim() || '';
 
   if (!subject) {
-    await interaction.reply({ content: tx.subjectRequired, flags: 64 });
+    await safeInteractionReply(interaction, { content: tx.subjectRequired, flags: 64 });
     return;
   }
 
@@ -153,12 +233,14 @@ async function showCreateModal(interaction, lang) {
   const supportRoleId = cfg?.supportRoleId;
 
   if (!panel?.channelId || !supportRoleId) {
-    await interaction.reply({ content: tx.notConfigured, flags: 64 });
+    await interaction.deferReply({ flags: 64 });
+    await interaction.editReply({ content: tx.notConfigured });
     return;
   }
 
   if (interaction.channelId !== panel.channelId) {
-    await interaction.reply({ content: tx.wrongChannel, flags: 64 });
+    await interaction.deferReply({ flags: 64 });
+    await interaction.editReply({ content: tx.wrongChannel });
     return;
   }
 
@@ -167,7 +249,8 @@ async function showCreateModal(interaction, lang) {
   const last = openCooldown.get(cooldownKey) ?? 0;
   const remaining = TICKET_COOLDOWN_MS - (now - last);
   if (remaining > 0) {
-    await interaction.reply({ content: tx.cooldown(Math.ceil(remaining / 1000)), flags: 64 });
+    await interaction.deferReply({ flags: 64 });
+    await interaction.editReply({ content: tx.cooldown(Math.ceil(remaining / 1000)) });
     return;
   }
   openCooldown.set(cooldownKey, now);
@@ -176,7 +259,8 @@ async function showCreateModal(interaction, lang) {
   const existingThreadId = cfg?.openTickets?.[key];
   const existingThread = await resolveExistingThread(guild, existingThreadId);
   if (existingThread) {
-    await interaction.reply({ content: tx.alreadyOpen(existingThread.id), flags: 64 });
+    await interaction.deferReply({ flags: 64 });
+    await interaction.editReply({ content: tx.alreadyOpen(existingThread.id) });
     return;
   }
 
@@ -255,7 +339,7 @@ async function createTicketFromModal(interaction, lang, subject, description) {
   try {
     await thread.send({
       embeds: [buildWaitingEmbed(lang, subject, description)],
-      components: [buildCloseButtonRow()]
+      components: [buildCloseButtonRow()] // Butonul apare pentru toți, dar verificăm permisiunile la click
     });
   } catch (err) {
     logger.error('Failed to send welcome embed to thread:', err);
@@ -272,7 +356,7 @@ async function createTicketFromModal(interaction, lang, subject, description) {
       const payload = {
         content: `Opened by <@${interaction.user.id}> <@&${supportRoleId}>`,
         embeds: [embed],
-        components: [buildJoinButtonRow(thread.id)]
+        components: [buildJoinAndCloseButtonRow(thread.id)]
       };
 
       if (logChannel && logChannel.type === ChannelType.GuildText) {
@@ -281,10 +365,14 @@ async function createTicketFromModal(interaction, lang, subject, description) {
       }
 
       if (logChannel && logChannel.type === ChannelType.GuildForum) {
+        // Asigurăm tag-ul Support în forum
+        const supportTag = await ensureSupportTag(logChannel);
+        
         const postName = `${thread.name}-${interaction.user.id.slice(-4)}`.slice(0, 100);
         const postThread = await logChannel.threads.create({
           name: postName,
-          message: payload
+          message: payload,
+          appliedTags: supportTag ? [supportTag.id] : []
         });
 
         supportForumThreadId = postThread.id;
@@ -379,7 +467,10 @@ async function handleJoin(interaction, threadId) {
 
   if (acceptedNow) {
     try {
-      await thread.send({ embeds: [buildAcceptedEmbed(interaction.user.id)] });
+      await thread.send({ 
+        embeds: [buildAcceptedEmbed(interaction.user.id)]
+        // Nu adăugăm alt buton "Close" - există deja în mesajul inițial
+      });
     } catch (err) {
       logger.debug('Failed to send accepted embed:', err.message);
     }
@@ -409,7 +500,7 @@ async function handleJoin(interaction, threadId) {
     logger.debug('Failed to update join button message:', err.message);
   }
 
-  await interaction.reply({ content: `Joined ticket: <#${thread.id}>`, flags: 64 });
+  await safeInteractionReply(interaction, { content: `Joined ticket: <#${thread.id}>`, flags: 64 });
 }
 
 async function handleCloseConfirm(interaction, threadId, reason, notes) {
@@ -431,10 +522,10 @@ async function handleCloseConfirm(interaction, threadId, reason, notes) {
   const supportRoleId = cfg?.supportRoleId;
   const member = interaction.member;
   const isSupport = supportRoleId && member && 'roles' in member ? member.roles.cache?.has(supportRoleId) : false;
-  const isOwner = meta?.ownerId === interaction.user.id;
 
-  if (!isSupport && !isOwner) {
-    await interaction.reply({ content: tx.closeDenied, flags: 64 });
+  // Doar membrii Support pot închide ticketele cu butonul Close
+  if (!isSupport) {
+    await interaction.reply({ content: '❌ Doar membrii Support pot închide ticketele!', flags: 64 });
     return;
   }
 
@@ -512,7 +603,7 @@ async function handleCloseConfirm(interaction, threadId, reason, notes) {
                 try {
                   const starter = await forumThread.messages.fetch(meta.supportForumMessageId);
                   if (starter?.editable) {
-                    await starter.edit({ components: [buildDisabledJoinButtonRow(thread.id)] });
+                    await starter.edit({ components: [buildDisabledJoinAndCloseButtonRow(thread.id)] });
                   }
                 } catch (err) {
                   logger.debug('Failed to disable join button on forum starter:', err.message);
@@ -557,6 +648,314 @@ async function handleCloseConfirm(interaction, threadId, reason, notes) {
       await thread.setArchived(true);
     } catch (archiveErr) {
       logger.error('Failed to archive thread:', archiveErr);
+    }
+  }
+
+  // Creăm un nou post în forum cu embed de summary și buton Închide
+  try {
+    const cfg = await getGuildTicketConfig(guild.id);
+    const supportLogChannelId = cfg?.supportLogChannelId;
+    
+    if (supportLogChannelId) {
+      const logChannel = await guild.channels.fetch(supportLogChannelId);
+      if (logChannel && logChannel.type === ChannelType.GuildForum) {
+        // Asigurăm tag-ul Support
+        const supportTag = await ensureSupportTag(logChannel);
+        
+        // Creăm embed de summary pentru forum
+        const { EmbedBuilder } = await import('discord.js');
+        const forumEmbed = new EmbedBuilder()
+          .setTitle(`📋 Ticket Închis - ${thread.name}`)
+          .setDescription(`Ticket-ul a fost închis de către <@${interaction.user.id}>`)
+          .setColor(0xFF6B6B)
+          .addFields(
+            { name: '👤 Creator', value: `<@${thread.ownerId}>`, inline: true },
+            { name: '🔒 Închis de', value: `<@${interaction.user.id}>`, inline: true },
+            { name: '📝 Motiv', value: reason || 'Fără motiv specificat', inline: false },
+            { name: '📅 Data', value: `<t:${Math.floor(Date.now() / 1000)}:F>`, inline: true }
+          )
+          .setTimestamp();
+
+        // Creăm post-ul în forum cu tag-ul Support și buton Închide
+        const tags = supportTag ? [supportTag.id] : [];
+        const forumPost = await logChannel.threads.create({
+          name: thread.name,
+          message: {
+            embeds: [forumEmbed],
+            components: [buildForumCloseButtonRow(thread.id)]
+          },
+          appliedTags: tags
+        });
+
+        logger.info(`Created forum post for closed ticket: ${forumPost.id}`);
+      }
+    }
+  } catch (error) {
+    logger.error('Failed to create forum post for closed ticket:', error);
+  }
+}
+
+async function handleSupportClose(interaction) {
+  const guild = interaction.guild;
+  const thread = interaction.channel;
+  
+  if (!thread || !thread.isThread()) {
+    await interaction.reply({ content: 'Această acțiune poate fi folosită doar în ticket threads.', flags: 64 });
+    return;
+  }
+
+  // Verificăm dacă utilizatorul este Suport
+  const cfg = await getGuildTicketConfig(guild.id);
+  const supportRoleId = cfg?.supportRoleId;
+  const member = interaction.member;
+  const isSupport = supportRoleId && member && 'roles' in member ? member.roles.cache?.has(supportRoleId) : false;
+
+  if (!isSupport) {
+    await interaction.reply({ content: 'Doar membrii Suport pot închide ticket-uri.', flags: 64 });
+    return;
+  }
+
+  try {
+    // Găsim tag-ul Rezolvat
+    const forum = thread.parent;
+    if (!forum || forum.type !== ChannelType.GuildForum) {
+      await interaction.reply({ content: 'Nu am putut găsi forum-ul ticket-ului.', flags: 64 });
+      return;
+    }
+
+    const rezolvatTag = forum.availableTags.find(tag => tag.name.toLowerCase() === 'rezolvat');
+    if (!rezolvatTag) {
+      await interaction.reply({ content: 'Tag-ul "Rezolvat" nu există. Contactează administratorul.', flags: 64 });
+      return;
+    }
+
+    // Aplicăm tag-ul Rezolvat
+    await thread.setAppliedTags([rezolvatTag.id]);
+    
+    // Lock și archive thread-ul
+    await thread.setLocked(true);
+    await thread.setArchived(true);
+    
+    // Trimitem confirmare
+    await interaction.reply({ 
+      content: `✅ Ticket-ul a fost marcat ca **Rezolvat** și arhivat.`, 
+      flags: 64 
+    });
+
+    logger.info(`Ticket ${thread.id} marked as resolved by ${interaction.user.tag}`);
+
+  } catch (error) {
+    logger.error('Error closing ticket:', error);
+    await interaction.reply({ 
+      content: '❌ A apărut o eroare la închiderea ticket-ului.', 
+      flags: 64 
+    });
+  }
+}
+
+async function handleForumClose(interaction, threadId) {
+  const guild = interaction.guild;
+  const thread = interaction.channel;
+  
+  // Verificăm dacă utilizatorul este Suport
+  const cfg = await getGuildTicketConfig(guild.id);
+  const supportRoleId = cfg?.supportRoleId;
+  const member = interaction.member;
+  const isSupport = supportRoleId && member && 'roles' in member ? member.roles.cache?.has(supportRoleId) : false;
+
+  if (!isSupport) {
+    try {
+      await interaction.update({ content: 'Doar membrii Suport pot închide ticket-uri.', flags: 64 });
+    } catch (updateError) {
+      try {
+        await interaction.reply({ content: 'Doar membrii Suport pot închide ticket-uri.', flags: 64 });
+      } catch (replyError) {
+        logger.warn('Could not respond to permission check:', replyError);
+      }
+    }
+    return;
+  }
+
+  if (!thread || !thread.isThread()) {
+    try {
+      await interaction.update({ content: 'Această acțiune poate fi folosită doar în ticket threads.', flags: 64 });
+    } catch (updateError) {
+      try {
+        await interaction.reply({ content: 'Această acțiune poate fi folosită doar în ticket threads.', flags: 64 });
+      } catch (replyError) {
+        logger.warn('Could not respond to thread check:', replyError);
+      }
+    }
+    return;
+  }
+
+  try {
+    // Găsim tag-ul Rezolvat
+    const forum = thread.parent;
+    logger.info(`Forum found: ${forum?.name}, type: ${forum?.type}`);
+    
+    if (!forum || forum.type !== ChannelType.GuildForum) {
+      logger.error(`Invalid forum: ${forum?.type}, expected: ${ChannelType.GuildForum}`);
+      try {
+        await interaction.update({ content: 'Nu am putut găsi forum-ul ticket-ului.', flags: 64 });
+      } catch (updateError) {
+        try {
+          await interaction.reply({ content: 'Nu am putut găsi forum-ul ticket-ului.', flags: 64 });
+        } catch (replyError) {
+          logger.warn('Could not respond to forum check:', replyError);
+        }
+      }
+      return;
+    }
+
+    logger.info(`Available tags: ${forum.availableTags.map(t => `${t.name} (${t.id})`).join(', ')}`);
+    
+    // Verificăm și reparăm tag-urile dacă nu au bulinele corecte
+    await ensureCorrectTagNames(forum);
+    
+    // Refetch pentru a obține tag-urile actualizate
+    await forum.fetch();
+    
+    const rezolvatTag = forum.availableTags.find(tag => tag.name.toLowerCase() === 'rezolvat' || tag.name.toLowerCase() === '🟢 rezolvat');
+    logger.info(`Rezolvat tag found: ${rezolvatTag ? `${rezolvatTag.name} (${rezolvatTag.id})` : 'NOT FOUND'}`);
+    
+    let finalRezolvatTag = rezolvatTag;
+    
+    if (!rezolvatTag) {
+      // Creăm automat tag-ul Rezolvat
+      try {
+        const newTags = [
+          ...forum.availableTags,
+          {
+            name: '🟢 Rezolvat'
+          }
+        ];
+        await forum.setAvailableTags(newTags);
+        logger.info('Created Rezolvat tag automatically');
+        
+        // Refetch the forum to get the new tag
+        await forum.fetch();
+        finalRezolvatTag = forum.availableTags.find(tag => tag.name.toLowerCase() === '🟢 rezolvat');
+        
+      } catch (error) {
+        logger.error('Failed to create Rezolvat tag:', error);
+        try {
+          await interaction.update({ content: '❌ Nu am putut crea tag-ul "Rezolvat".', flags: 64 });
+        } catch (updateError) {
+          try {
+            await interaction.reply({ content: '❌ Nu am putut crea tag-ul "Rezolvat".', flags: 64 });
+          } catch (replyError) {
+            logger.warn('Could not respond to tag creation error:', replyError);
+          }
+        }
+        return;
+      }
+    }
+    
+    // Aplicăm tag-ul Rezolvat
+    await thread.setAppliedTags([finalRezolvatTag.id]);
+    logger.info(`Successfully applied Rezolvat tag to thread ${thread.id}`);
+    
+    const message = !rezolvatTag 
+      ? `✅ Ticket-ul a fost marcat ca **Rezolvat**. (Tag creat automat)`
+      : `✅ Ticket-ul a fost marcat ca **Rezolvat**.`;
+    
+    try {
+      await interaction.update({ 
+        content: message, 
+        flags: 64 
+      });
+    } catch (updateError) {
+      // Dacă update nu funcționează, încercăm reply
+      try {
+        await interaction.reply({ 
+          content: message, 
+          flags: 64 
+        });
+      } catch (replyError) {
+        logger.warn('Could not respond to interaction:', replyError);
+      }
+    }
+
+    logger.info(`Forum ticket ${thread.id} marked as resolved by ${interaction.user.tag}`);
+
+  } catch (error) {
+    logger.error('Error closing forum ticket:', error);
+    try {
+      await interaction.update({ 
+        content: '❌ A apărut o eroare la închiderea ticket-ului.', 
+        flags: 64 
+      });
+    } catch (updateError) {
+      try {
+        await interaction.reply({ 
+          content: '❌ A apărut o eroare la închiderea ticket-ului.', 
+          flags: 64 
+        });
+      } catch (replyError) {
+        logger.warn('Could not respond to interaction error:', replyError);
+      }
+    }
+  }
+}
+
+async function ensureCorrectTagNames(forum) {
+  const currentTags = forum.availableTags;
+  let needsUpdate = false;
+  const updatedTags = [...currentTags];
+
+  // Verificăm INFO
+  const infoTag = currentTags.find(tag => tag.name.toLowerCase() === 'info');
+  if (infoTag && !infoTag.name.startsWith('🔵')) {
+    const index = updatedTags.findIndex(tag => tag.id === infoTag.id);
+    if (index !== -1) {
+      updatedTags[index] = { ...infoTag, name: '🔵 INFO' };
+      needsUpdate = true;
+      logger.info('Updating INFO tag to include bullet');
+    }
+  }
+
+  // Verificăm Support - eliminăm tag-ul vechi dacă există
+  const oldSupportTag = currentTags.find(tag => tag.name === 'Support');
+  if (oldSupportTag) {
+    const index = updatedTags.findIndex(tag => tag.id === oldSupportTag.id);
+    if (index !== -1) {
+      // Eliminăm tag-ul vechi
+      updatedTags.splice(index, 1);
+      needsUpdate = true;
+      logger.info('Removing old Support tag without bullet');
+    }
+  }
+
+  // Verificăm Support nou
+  const supportTag = currentTags.find(tag => tag.name.toLowerCase() === 'support' || tag.name.toLowerCase() === '🟠 support');
+  if (supportTag && !supportTag.name.startsWith('🟠')) {
+    const index = updatedTags.findIndex(tag => tag.id === supportTag.id);
+    if (index !== -1) {
+      updatedTags[index] = { ...supportTag, name: '🟠 Support' };
+      needsUpdate = true;
+      logger.info('Updating Support tag to include bullet');
+    }
+  }
+
+  // Verificăm Rezolvat
+  const rezolvatTag = currentTags.find(tag => tag.name.toLowerCase() === 'rezolvat');
+  if (rezolvatTag && !rezolvatTag.name.startsWith('🟢')) {
+    const index = updatedTags.findIndex(tag => tag.id === rezolvatTag.id);
+    if (index !== -1) {
+      updatedTags[index] = { ...rezolvatTag, name: '🟢 Rezolvat' };
+      needsUpdate = true;
+      logger.info('Updating Rezolvat tag to include bullet');
+    }
+  }
+
+  // Aplicăm actualizările dacă este necesar
+  if (needsUpdate) {
+    try {
+      await forum.setAvailableTags(updatedTags);
+      logger.info('Updated tag names to include correct bullets and removed old tags');
+    } catch (error) {
+      logger.error('Failed to update tag names:', error);
     }
   }
 }

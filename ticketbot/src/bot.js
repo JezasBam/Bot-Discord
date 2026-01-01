@@ -6,20 +6,11 @@ import { loadCommands } from './loaders/commands.js';
 import { loadEvents } from './loaders/events.js';
 import { setupGracefulShutdown } from './core/graceful-shutdown.js';
 import { startCooldownCleanup, stopCooldownCleanup } from './features/tickets/index.js';
+import { startHealthServer } from './core/health.js';
+import { isTransientNetworkError, isInvalidTokenError } from '../../shared/utils/network-errors.js';
 
 function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
-}
-
-function isTransientNetworkError(err) {
-  const code = err?.code;
-  return code === 'ENOTFOUND' || code === 'EAI_AGAIN' || code === 'ECONNRESET' || code === 'ETIMEDOUT';
-}
-
-function isInvalidTokenError(err) {
-  if (err?.code === 'TokenInvalid') return true;
-  const msg = typeof err?.message === 'string' ? err.message : '';
-  return /invalid token/i.test(msg);
 }
 
 export async function createBot() {
@@ -46,7 +37,13 @@ export async function createBot() {
   });
 
   const client = new Client({
-    intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMembers],
+    intents: [
+      GatewayIntentBits.Guilds, 
+      GatewayIntentBits.GuildMembers,
+      GatewayIntentBits.GuildModeration,
+      GatewayIntentBits.GuildMessages,
+      GatewayIntentBits.MessageContent
+    ],
     partials: [Partials.Channel, Partials.Message, Partials.ThreadMember]
   });
 
@@ -114,6 +111,9 @@ export async function startBot() {
       await sleep(delayMs);
     }
   }
+
+  // Start health check server after successful login
+  startHealthServer(client);
 
   return client;
 }

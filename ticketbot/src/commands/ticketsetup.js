@@ -215,14 +215,61 @@ async function ensureSupportLogChannel(guild, categoryId, channelName, supportRo
     } catch (err) {
       logger.debug('Failed to set forum permissions:', err.message);
     }
+    
+    // Verificăm dacă tag-urile INFO, Support și Rezolvat există, dacă nu le adăugăm
+    const infoTag = existing.availableTags.find(tag => tag.name.toLowerCase() === 'info' || tag.name.toLowerCase() === '🔵 info');
+    const supportTag = existing.availableTags.find(tag => tag.name.toLowerCase() === 'support' || tag.name.toLowerCase() === '🟠 support');
+    const rezolvatTag = existing.availableTags.find(tag => tag.name.toLowerCase() === 'rezolvat' || tag.name.toLowerCase() === '🟢 rezolvat');
+    
+    if (!infoTag || !supportTag || !rezolvatTag) {
+      try {
+        const newTags = [...existing.availableTags];
+        
+        if (!infoTag) {
+          newTags.push({
+            name: '🔵 INFO'
+          });
+        }
+        
+        if (!supportTag) {
+          newTags.push({
+            name: '🟠 Support'
+          });
+        }
+        
+        if (!rezolvatTag) {
+          newTags.push({
+            name: '🟢 Rezolvat'
+          });
+        }
+        
+        await existing.setAvailableTags(newTags);
+        logger.info('Added missing tags to existing forum channel');
+      } catch (err) {
+        logger.debug('Failed to add tags to forum:', err.message);
+      }
+    }
+    
     return existing;
   }
 
+  // Creăm forum-ul cu tag-urile INFO, Support și Rezolvat incluse
   return guild.channels.create({
     name: channelName,
     type: ChannelType.GuildForum,
     parent: categoryId,
-    permissionOverwrites: overwrites
+    permissionOverwrites: overwrites,
+    availableTags: [
+      {
+        name: '🔵 INFO'
+      },
+      {
+        name: '🟠 Support'
+      },
+      {
+        name: '🟢 Rezolvat'
+      }
+    ]
   });
 }
 

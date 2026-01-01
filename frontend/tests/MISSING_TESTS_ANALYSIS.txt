@@ -1,0 +1,608 @@
+ 📊 ANALIZĂ TESTE LIPSĂ - Bot Discord Project
+# Generat: 31 Decembrie 2025
+# Coverage Curent: 27.23% (Statements) / 27.95% (Branch) / 25.28% (Functions) / 27.78% (Lines)
+# Target: 80-90%
+
+---
+
+## 🎯 CODE COVERAGE - TESTE LIPSĂ
+
+### **📁 features/embedEditor/utils/payload.ts**
+**Coverage Curent: 2.5% Statements / 0% Branch / 20% Functions / 2.94% Lines** - **Prioritate MAXIMĂ**
+
+#### ✅ Teste Existente:
+- [ ] createEmptyPayload() - test existent parțial
+- [ ] createEmptyEmbed() - test existent parțial
+
+#### ❌ Teste Lipsă:
+1. **cleanPayloadForExport()** - Funcție critică pentru export
+   - Test cu payload gol
+   - Test cu payload complet
+   - Test cu payload parțial (doar content)
+   - Test cu payload parțial (doar username)
+   - Test cu payload parțial (doar avatar_url)
+   - Test cu embed-uri goale (ar trebui eliminate)
+   - Test cu embed-uri valide (ar trebui păstrate)
+   - Test cu embed-uri cu câmpuri goale (ar trebui curățate)
+
+2. **validatePayload()** - Dacă există funcții de validare
+   - Test payload valid
+   - Test payload invalid
+   - Test cu embed-uri invalide
+
+3. **Edge cases pentru createEmptyEmbed()**
+   - Test crypto.randomUUID() fallback
+   - Test valori default
+
+---
+
+### **📁 api/client.ts**
+**Coverage Curent: 9.09% Statements / 9.09% Branch / 8.33% Functions / 9.52% Lines** - **Prioritate HIGH**
+
+#### ✅ Teste Existente:
+- [ ] api.bot() - test existent
+- [ ] api.getGuilds() - test existent parțial
+- [ ] api.health() - test existent parțial
+
+#### ❌ Teste Lipsă:
+1. **getGuild()** - Guild specific
+   - Test cu guild ID valid
+   - Test cu guild ID invalid
+   - Test cu guild inexistent
+   - Test error handling
+
+2. **getGuildChannels()** - Channels din guild
+   - Test cu guild valid
+   - Test cu guild invalid
+   - Test structură categories/uncategorized
+   - Test sortare după position
+
+3. **getChannelMessages()** - Mesaje din channel
+   - Test cu channel valid
+   - Test cu channel invalid
+   - Test paginare (limit, offset)
+   - Test mesaje goale
+   - Test error handling
+
+4. **sendMessage()** - Trimitere mesaj
+   - Test cu content valid
+   - Test cu embed-uri valide
+   - Test cu ambele (content + embeds)
+   - Test cu channel invalid
+   - Test error handling
+   - Test rate limiting
+
+5. **editMessage()** - Editare mesaj
+   - Test cu message ID valid
+   - Test cu message ID invalid
+   - Test update content
+   - Test update embeds
+   - Test error handling
+
+6. **deleteMessage()** - Ștergere mesaj
+   - Test cu message ID valid
+   - Test cu message ID invalid
+   - Test confirmare ștergere
+   - Test error handling
+
+7. **Error Handling Global**
+   - Test network errors
+   - Test timeout errors
+   - Test 404 errors
+   - Test 500 errors
+   - Test retry logic (dacă există)
+
+---
+
+### **📁 hooks/useBotInfo.ts**
+**Coverage Curent: 0% Statements / 0% Branch / 0% Functions / 0% Lines** - **Prioritate HIGH**
+
+#### ✅ Teste Existente:
+- [ ] useBotInfo.test.js există - trebuie verificat coverage
+
+#### ❌ Teste Lipsă:
+1. **Hook Initialization**
+   - Test stare inițială
+   - Test loading state
+   - Test error state
+
+2. **Data Fetching**
+   - Test fetch successful
+   - Test fetch failure
+   - Test retry logic
+   - Test caching (dacă există)
+
+3. **State Management**
+   - Test update bot info
+   - Test clear bot info
+   - Test refetch functionality
+
+4. **Edge Cases**
+   - Test network offline
+   - Test slow connection
+   - Test concurrent requests
+
+---
+
+### **📁 features/discord/hooks/**
+**Coverage Curent: 43.31% Statements / 23.91% Branch / 43.9% Functions / 42.43% Lines** - **Prioritate HIGH**
+
+#### ✅ Teste Existente:
+- [ ] useConnection - **100% coverage** ✅
+- [ ] useGuilds - **0% coverage** ❌
+- [ ] useSocket - **0% coverage** ❌
+- [ ] useChannelMessages - **73.33% coverage** ⚠️
+- [ ] useBotProfile - **32.65% coverage** ⚠️
+
+#### ❌ Teste Lipsă - useConnection.ts:
+1. **Connection States**
+   - Test 'connecting' state
+   - Test 'reconnecting' state
+   - Test 'disconnected' state
+   - Test 'error' state
+
+2. **Auto-reconnect Logic**
+   - Test reconnect on disconnect
+   - Test reconnect failure
+   - Test max retry attempts
+   - Test exponential backoff
+
+3. **Health Check Logic**
+   - Test periodic health checks
+   - Test health check failure
+   - Test health check recovery
+
+4. **Socket Integration**
+   - Test socket events
+   - Test socket disconnection
+   - Test socket reconnection
+
+#### ❌ Teste Lipsă - useGuilds.ts:
+1. **Guild Management**
+   - Test fetch guilds successful
+   - Test fetch guilds failure
+   - Test cache invalidation
+   - Test real-time updates (dacă există)
+
+2. **Guild Selection**
+   - Test select guild
+   - Test deselect guild
+   - Test guild not found
+
+3. **Permission Handling**
+   - Test guild permissions
+   - Test admin permissions
+   - Test member permissions
+
+#### ❌ Teste Lipsă - useSocket.ts:
+1. **Socket Connection**
+   - Test socket connect
+   - Test socket disconnect
+   - Test socket error
+   - Test socket reconnect
+
+2. **Event Handling**
+   - Test message events
+   - Test guild events
+   - Test channel events
+   - Test user events
+
+3. **Real-time Updates**
+   - Test live message updates
+   - Test guild status updates
+   - Test user presence updates
+
+#### ❌ Teste Lipsă - useChannelMessages.ts:
+1. **Message Fetching**
+   - Test fetch messages
+   - Test fetch more messages (pagination)
+   - Test fetch messages failure
+   - Test empty channel
+
+2. **Message Management**
+   - Test send message
+   - Test edit message
+   - Test delete message
+   - Test message reactions (dacă există)
+
+3. **Real-time Messages**
+   - Test new message received
+   - Test message updated
+   - Test message deleted
+
+4. **State Management**
+   - Test message cache
+   - Test scroll position
+   - Test unread messages
+
+---
+
+### **📁 features/projects/hooks/**
+**Coverage Curent: 1.81% Statements / 0% Branch / 0% Functions / 1.96% Lines** - **Prioritate MEDIUM**
+
+#### ✅ Teste Existente:
+- [ ] useProjects - **0% coverage** ❌
+- [ ] useCurrentProject - **7.69% coverage** ❌
+
+#### ❌ Teste Lipsă - useProjects.ts:
+1. **Project CRUD**
+   - Test create project
+   - Test read projects
+   - Test update project
+   - Test delete project
+   - Test project validation
+
+2. **Project Management**
+   - Test project selection
+   - Test project switching
+   - Test project search/filter
+   - Test project sorting
+
+3. **Storage Integration**
+   - Test local storage
+   - Test cloud storage (dacă există)
+   - Test sync conflicts
+   - Test offline mode
+
+#### ❌ Teste Lipsă - useCurrentProject.ts:
+1. **Current Project State**
+   - Test set current project
+   - Test clear current project
+   - Test project not found
+   - Test project loading
+
+2. **Project Updates**
+   - Test auto-save
+   - Test manual save
+   - Test save failure
+   - Test save conflicts
+
+---
+
+### **📁 app/layout/Layout.tsx**
+**Coverage Curent: 0% Statements / 0% Branch / 0% Functions / 0% Lines** - **Prioritate LOW**
+
+#### ✅ Teste Existente:
+- [ ] None
+
+#### ❌ Teste Lipsă:
+1. **Layout Rendering**
+   - Test layout structure
+   - Test responsive design
+   - Test theme switching (dacă există)
+
+2. **Navigation**
+   - Test navigation items
+   - Test active state
+   - Test navigation clicks
+
+3. **Layout State**
+   - Test sidebar toggle
+   - Test mobile menu
+   - Test layout persistence
+
+---
+
+### **📁 components/ErrorBoundary.tsx**
+**Coverage Curent: 0% Statements / 0% Branch / 20% Functions / 0% Lines** - **Prioritate LOW**
+
+#### ✅ Teste Existente:
+- [ ] None
+
+#### ❌ Teste Lipsă:
+1. **Error Catching**
+   - Test catch render errors
+   - Test catch async errors
+   - Test error logging
+
+2. **Error Display**
+   - Test error message display
+   - Test retry functionality
+   - Test fallback UI
+
+3. **Error Recovery**
+   - Test error reset
+   - Test component recovery
+   - Test error propagation
+
+---
+
+### **📁 features/embedEditor/preview/EmbedPreview.tsx**
+**Coverage Curent: 0% Statements / 0% Branch / 0% Functions / 0% Lines** - **Prioritate LOW**
+
+#### ✅ Teste Existente:
+- [ ] None
+
+#### ❌ Teste Lipsă:
+1. **Preview Rendering**
+   - Test embed display
+   - Test content preview
+   - Test field preview
+
+2. **Preview Updates**
+   - Test real-time preview
+   - Test preview validation
+   - Test preview errors
+
+3. **Preview Interactions**
+   - Test preview clicks
+   - Test preview hover
+   - Test preview scroll
+
+---
+
+## 🌍 ACCESSIBILITY COVERAGE - TESTE LIPSĂ
+
+### **📁 Keyboard Navigation**
+**Coverage Curent: 0%** - **Prioritate HIGH**
+
+#### ❌ Teste Lipsă:
+1. **Full Keyboard Navigation**
+   - Test Tab order through entire app
+   - Test Shift+Tab reverse navigation
+   - Test Enter/Space for buttons
+   - Test Escape for modals/dialogs
+
+2. **Focus Management**
+   - Test focus trap in modals
+   - Test focus restoration
+   - Test skip links
+   - Test focus indicators
+
+3. **Keyboard Shortcuts**
+   - Test custom shortcuts (dacă există)
+   - Test shortcut conflicts
+   - Test shortcut help
+
+---
+
+### **📁 Screen Reader Support**
+**Coverage Curent: 0%** - **Prioritate HIGH**
+
+#### ❌ Teste Lipsă:
+1. **ARIA Labels**
+   - Test proper ARIA labels
+   - Test ARIA descriptions
+   - Test ARIA roles
+   - Test ARIA states
+
+2. **Semantic HTML**
+   - Test proper heading structure
+   - Test landmark elements
+   - Test list semantics
+   - Test table semantics
+
+3. **Screen Reader Compatibility**
+   - Test NVDA compatibility
+   - Test VoiceOver compatibility
+   - Test JAWS compatibility (dacă e relevant)
+
+---
+
+### **📁 Visual Accessibility**
+**Coverage Curent: 0%** - **Prioritate MEDIUM**
+
+#### ❌ Teste Lipsă:
+1. **Color Contrast**
+   - Test text contrast ratios
+   - Test button contrast
+   - Test link contrast
+   - Test icon contrast
+
+2. **Text Resizing**
+   - Test 200% zoom compatibility
+   - Test text-only zoom
+   - Test layout breaking
+   - Test text readability
+
+3. **Motion & Animation**
+   - Test reduced motion preference
+   - Test animation controls
+   - Test autoplay prevention
+
+---
+
+## 🔧 INTEGRATION COVERAGE - TESTE LIPSĂ
+
+### **📁 API Integration**
+**Coverage Curent: Parțial** - **Prioritate HIGH**
+
+#### ❌ Teste Lipsă:
+1. **End-to-End API Flow**
+   - Test complete bot connection flow
+   - Test message sending flow
+   - Test guild management flow
+   - Test error recovery flow
+
+2. **Real-time Features**
+   - Test socket integration
+   - Test live message updates
+   - Test real-time collaboration
+   - Test connection resilience
+
+---
+
+### **📁 Component Integration**
+**Coverage Curent: Parțial** - **Prioritate MEDIUM**
+
+#### ❌ Teste Lipsă:
+1. **Cross-Component Communication**
+   - Test parent-child communication
+   - Test sibling communication
+   - Test context providers
+   - Test event bubbling
+
+2. **State Management Integration**
+   - Test global state updates
+   - Test local state isolation
+   - Test state persistence
+   - Test state synchronization
+
+---
+
+## ⚡ PERFORMANCE COVERAGE - TESTE LIPSĂ
+
+### **📁 Response Time**
+**Coverage Curent: 0%** - **Prioritate MEDIUM**
+
+#### ❌ Teste Lipsă:
+1. **API Response Times**
+   - Test API call performance
+   - Test concurrent requests
+   - Test timeout handling
+   - Test retry performance
+
+2. **UI Performance**
+   - Test render performance
+   - Test large data sets
+   - Test memory usage
+   - Test animation performance
+
+---
+
+### **📁 Smoke Testing**
+**Coverage Curent: 0%** - **Prioritate LOW**
+
+#### ❌ Teste Lipsă:
+1. **Critical Path Testing**
+   - Test app startup
+   - Test core functionality
+   - Test error scenarios
+   - Test recovery scenarios
+
+---
+
+## 🔒 SECURITY COVERAGE - TESTE LIPSĂ
+
+### **📁 Authentication**
+**Coverage Curent: 0%** - **Prioritate HIGH**
+
+#### ❌ Teste Lipsă:
+1. **Bot Authentication**
+   - Test token validation
+   - Test token refresh
+   - Test token expiration
+   - Test unauthorized access
+
+2. **Permission Validation**
+   - Test guild permissions
+   - Test channel permissions
+   - Test admin permissions
+   - Test permission escalation
+
+---
+
+### **📁 Error Handling**
+**Coverage Curent: 0%** - **Prioritate MEDIUM**
+
+#### ❌ Teste Lipsă:
+1. **Input Validation**
+   - Test XSS prevention
+   - Test injection attacks
+   - Test input sanitization
+   - Test length limits
+
+2. **Data Protection**
+   - Test sensitive data exposure
+   - Test data encryption
+   - Test secure storage
+   - Test data cleanup
+
+---
+
+## � COVERAGE ACTUAL DETALIAT
+
+### **🎯 Componente Principale - Status Real**
+
+| Componentă/Fișier | Statements | Branch | Functions | Lines | Status |
+|------------------|------------|---------|------------|-------|---------|
+| **Total Proiect** | **27.23%** | **27.95%** | **25.28%** | **27.78%** | ⚠️ **NECESITĂ ÎMBUNĂTĂȚIRE** |
+| api/client.ts | 9.09% | 9.09% | 8.33% | 9.52% | 🔴 **CRITIC** |
+| app/App.tsx | 23.21% | 6.31% | 9.09% | 24.52% | 🟡 **MEDIU** |
+| app/layout/Layout.tsx | 0% | 0% | 0% | 0% | 🔴 **CRITIC** |
+| components/ErrorBoundary.tsx | 0% | 0% | 20% | 0% | 🔴 **CRITIC** |
+| features/discord/hooks/ | 43.31% | 23.91% | 43.9% | 42.43% | 🟡 **MEDIU** |
+| └─ useConnection.ts | **100%** | **87.5%** | **100%** | **100%** | ✅ **EXCELLENT** |
+| └─ useGuilds.ts | 0% | 0% | 0% | 0% | 🔴 **CRITIC** |
+| └─ useSocket.ts | 0% | 0% | 0% | 0% | 🔴 **CRITIC** |
+| └─ useChannelMessages.ts | 73.33% | 40.74% | 64.28% | 73.58% | 🟡 **MEDIU** |
+| └─ useBotProfile.ts | 32.65% | 13.33% | 60% | 33.33% | 🟡 **MEDIU** |
+| features/embedEditor/ | 61.53% | 0% | 66.66% | 63.63% | 🟡 **MEDIU** |
+| └─ ColorPicker.tsx | **100%** | **100%** | **100%** | **100%** | ✅ **EXCELLENT** |
+| └─ EmbedEditor.tsx | 93.93% | 85.45% | 100% | 100% | ✅ **EXCELLENT** |
+| └─ EmbedFieldsEditor.tsx | 48.83% | 46.42% | 33.33% | 52.77% | 🟡 **MEDIU** |
+| └─ EmbedSection.tsx | 37.5% | 67.44% | 13.79% | 38.46% | 🟡 **MEDIU** |
+| └─ MessageSection.tsx | **100%** | **100%** | **100%** | **100%** | ✅ **EXCELLENT** |
+| └─ EmbedPreview.tsx | 0% | 0% | 0% | 0% | 🔴 **CRITIC** |
+| └─ payload.ts | 2.5% | 0% | 20% | 2.94% | 🔴 **CRITIC** |
+| features/projects/hooks/ | 1.81% | 0% | 0% | 1.96% | 🔴 **CRITIC** |
+| └─ useProjects.ts | 0% | 0% | 0% | 0% | 🔴 **CRITIC** |
+| └─ useCurrentProject.ts | 7.69% | 0% | 0% | 7.69% | 🔴 **CRITIC** |
+| hooks/useBotInfo.ts | 0% | 0% | 0% | 0% | 🔴 **CRITIC** |
+
+### **🏆 Top Performers (100% Coverage)**
+1. ✅ **ColorPicker.tsx** - 100% complete
+2. ✅ **EmbedEditor.tsx** - 93.93% (excelent)
+3. ✅ **MessageSection.tsx** - 100% complete
+4. ✅ **useConnection.ts** - 100% complete
+
+### **🚨 Critice (0% Coverage)**
+1. 🔴 **Layout.tsx** - 0% (componentă structurală)
+2. 🔴 **useGuilds.ts** - 0% (funcționalitate cheie)
+3. 🔴 **useSocket.ts** - 0% (real-time features)
+4. 🔴 **useProjects.ts** - 0% (management proiecte)
+5. 🔴 **useBotInfo.ts** - 0% (informații bot)
+6. 🔴 **EmbedPreview.tsx** - 0% (preview component)
+7. 🔴 **payload.ts** - 2.5% (utilități critice)
+
+---
+
+## �📈 SUMMARY PRIORITIES
+
+### **🔥 Priority 1 - Quick Wins (1-2 zile)**
+1. **features/embedEditor/utils/payload.ts** - 2.5% → 100%
+2. **hooks/useBotInfo.ts** - 0% → 100%
+3. **app/layout/Layout.tsx** - 0% → 100%
+4. **components/ErrorBoundary.tsx** - 0% → 100%
+
+### **🚀 Priority 2 - Core Features (2-3 zile)**
+1. **api/client.ts** - 9.09% → 100%
+2. **features/discord/hooks/** - 7.37% → 100%
+3. **features/projects/hooks/** - 1.81% → 100%
+
+### **🔧 Priority 3 - Complete Coverage (2-3 zile)**
+1. **Accessibility Coverage** - 0% → 90%
+2. **Integration Coverage** - Parțial → 100%
+3. **Performance Coverage** - 0% → 80%
+4. **Security Coverage** - 0% → 90%
+
+---
+
+## 🎯 TARGET ESTIMATIONS
+
+### **Code Coverage Target: 80-90%**
+- **Teste de adăugat**: ~150-200 teste
+- **Efort estimat**: 15-20 zile
+- **Impact**: Reducere bug-uri 75-85%
+
+### **Accessibility Coverage Target: 90-95%**
+- **Teste de adăugat**: ~50-70 teste
+- **Efort estimat**: 5-7 zile
+- **Impact**: Conformitate WCAG AA
+
+### **Integration Coverage Target: 100%**
+- **Teste de adăugat**: ~30-40 teste
+- **Efort estimat**: 3-4 zile
+- **Impact**: Fiabilitate end-to-end
+
+---
+
+## 📝 RECOMANDĂRI
+
+1. **Începeți cu payload.ts** - impact maxim cu efort minim
+2. **Folosiți Test-Driven Development** pentru cod nou
+3. **Integrați în CI/CD** pentru coverage gates
+4. **Monitorizați trends** săptămânal
+5. **Prioritizați funcționalități critice** mai întâi
+
+**Total estimat: 25-30 zile pentru 80-90% coverage complete!** 🚀

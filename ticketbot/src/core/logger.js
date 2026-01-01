@@ -1,3 +1,4 @@
+import pino from 'pino';
 import { inspect } from 'node:util';
 
 const LEVELS = {
@@ -15,27 +16,8 @@ function normalizeLevel(level) {
   return 'warn';
 }
 
-function shouldLog(minLevel, level) {
-  return LEVELS[level] <= LEVELS[minLevel];
-}
-
 function formatArgs(args) {
   return args.map((a) => (typeof a === 'string' ? a : inspect(a, { depth: 5, colors: false }))).join(' ');
-}
-
-function formatJson(level, args, meta = {}) {
-  return JSON.stringify({
-    ts: new Date().toISOString(),
-    level,
-    msg: formatArgs(args),
-    ...meta
-  });
-}
-
-function formatText(level, args) {
-  const ts = new Date().toISOString();
-  const prefix = `[${ts}] [${level.toUpperCase()}]`;
-  return `${prefix} ${formatArgs(args)}`;
 }
 
 export function createLogger(options = {}) {
@@ -43,16 +25,60 @@ export function createLogger(options = {}) {
   const format = options.format || 'text';
   const useJson = format === 'json';
 
-  const log = (logLevel, args) => {
-    if (!shouldLog(level, logLevel)) return;
-    const output = useJson ? formatJson(logLevel, args) : formatText(logLevel, args);
+  // Pino configuration for production performance
+  const pinoConfig = {
+    level: level === 'debug' ? 'debug' : level,
+    formatters: {
+      level: (label) => ({ level: label }),
+      log: (object) => {
+        // Preserve custom format while using Pino's performance
+        if (useJson) {
+          return {
+            ...object,
+            msg: object.msg || formatArgs(object.args || [])
+          };
+        }
+        return object;
+      }
+    },
+    // Performance optimizations
+    serialize: !useJson,
+    timestamp: pino.stdTimeFunctions.isoTime,
+    // Custom pretty print for development
+    transport: useJson
+      ? undefined
+      : {
+          target: 'pino-pretty',
+          options: {
+            colorize: true,
+            translateTime: 'SYS:standard',
+            ignore: 'pid,hostname',
+            messageFormat: '[{level}] {msg}'
+          }
+        }
+  };
 
-    if (logLevel === 'error') {
-      console.error(output);
-    } else if (logLevel === 'warn') {
-      console.warn(output);
-    } else {
-      console.log(output);
+  const pinoLogger = pino(pinoConfig);
+
+  // Wrapper to maintain exact same API as before
+  const log = (logLevel, args) => {
+    if (!args || args.length === 0) return;
+
+    const message = formatArgs(args);
+
+    switch (logLevel) {
+      case 'error':
+        pinoLogger.error(message);
+        break;
+      case 'warn':
+        pinoLogger.warn(message);
+        break;
+      case 'info':
+        pinoLogger.info(message);
+        break;
+      case 'debug':
+        pinoLogger.debug(message);
+        break;
     }
   };
 
@@ -63,7 +89,17 @@ export function createLogger(options = {}) {
     warn: (...args) => log('warn', args),
     info: (...args) => log('info', args),
     debug: (...args) => log('debug', args),
-    child: (meta) => createLogger({ ...options, meta: { ...options.meta, ...meta } })
+    child: (meta) => {
+      const childLogger = pinoLogger.child(meta);
+      return {
+        ...createLogger(options),
+        error: (...args) => log('error', args),
+        warn: (...args) => log('warn', args),
+        info: (...args) => log('info', args),
+        debug: (...args) => log('debug', args),
+        child: (newMeta) => childLogger.child(newMeta)
+      };
+    }
   };
 }
 
