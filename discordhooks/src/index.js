@@ -124,7 +124,9 @@ if (!token) {
   process.exit(1);
 }
 
-startApiServer(client, logger, 4000)
+const port = Number(process.env.PORT) || 4000;
+
+startApiServer(client, logger, port)
   .then((result) => {
     io = result.io;
     logger.info("API server started successfully");

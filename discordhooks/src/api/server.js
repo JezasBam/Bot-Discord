@@ -2,6 +2,8 @@ import express from "express";
 import cors from "cors";
 import { createServer } from "http";
 import { Server } from "socket.io";
+import { fileURLToPath } from "url";
+import { dirname, join } from "path";
 import { createGuildsRouter } from "./routes/guilds.js";
 import { createChannelsRouter } from "./routes/channels.js";
 import { createMessagesRouter } from "./routes/messages.js";
@@ -18,6 +20,9 @@ export function createApiServer(client, logger) {
       credentials: true,
     },
   });
+
+  const __dirname = dirname(fileURLToPath(import.meta.url));
+  const frontendDistPath = join(__dirname, "../../../frontend/dist");
 
   app.use(
     cors({
@@ -47,7 +52,14 @@ export function createApiServer(client, logger) {
   app.use("/api/bot", createBotRouter(client, logger));
   app.use("/api/auth", createAuthRouter(logger));
 
-  app.use((err, req, res) => {
+  app.use(express.static(frontendDistPath));
+
+  app.get("*", (req, res, next) => {
+    if (req.path.startsWith("/api")) return next();
+    res.sendFile(join(frontendDistPath, "index.html"));
+  });
+
+  app.use((err, req, res, next) => {
     logger.error("API error:", err);
     res.status(500).json({ error: err.message });
   });

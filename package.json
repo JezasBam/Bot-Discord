@@ -18,6 +18,7 @@
     "discordadmins:dev": "echo '🔧 Discord Admins is integrated into ticketbot and loaded automatically'",
     "frontend:dev": "npm run dev -w frontend",
     "frontend:build": "npm run build -w frontend",
+    "prod": "npm run frontend:build && npm run hooks:start",
     "ticketbot:build": "echo '✅ Ticketbot: No build needed (Node.js modules)'",
     "hooks:build": "echo '✅ Discordhooks: No build needed (Node.js modules)'",
     "discordadmins:build": "echo '✅ Discord Admins: No build needed (Node.js modules)'",
