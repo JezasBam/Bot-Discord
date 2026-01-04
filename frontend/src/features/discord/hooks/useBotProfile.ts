@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import type { BotProfile } from "../components/BotProfileEditor";
-
-const API_BASE = import.meta.env.VITE_API_BASE || "http://localhost:4000";
+import { API_BASE } from "@/config/env";
 
 export function useBotProfile() {
   const [profile, setProfile] = useState<BotProfile | null>(null);
@@ -13,7 +12,7 @@ export function useBotProfile() {
       setLoading(true);
       setError(null);
 
-      const response = await fetch(`${API_BASE}/api/bot`);
+      const response = await fetch(`${API_BASE}/bot`);
       if (!response.ok) {
         throw new Error(`HTTP ${response.status}: ${response.statusText}`);
       }
@@ -38,7 +37,7 @@ export function useBotProfile() {
     try {
       setError(null);
 
-      const response = await fetch(`${API_BASE}/api/bot/profile`, {
+      const response = await fetch(`${API_BASE}/bot/profile`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
