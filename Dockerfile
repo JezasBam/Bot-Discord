@@ -13,7 +13,6 @@ RUN npm install
 COPY . .
 
 ENV NODE_ENV=production
-
 ENV VITE_API_URL=/api
 ENV VITE_SOCKET_URL=/
 
