@@ -23,7 +23,7 @@ export default defineConfig({
   preview: {
     port: 4173,
     host: true,
-    allowedHosts: ['*.traefik.me'],
+    allowedHosts: ['*.traefik.me', 'discord-bot-full-bot-ovc6mi-861be7-45-13-151-18.traefik.me', true],
   },
   build: {
     rollupOptions: {
