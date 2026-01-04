@@ -9,6 +9,21 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const app = express();
 const server = createServer(app);
 
+// Debug endpoint to inspect backend health
+app.get('/debug', async (req, res) => {
+  try {
+    const backendHealth = await fetch('http://localhost:4000/api/health');
+    const healthText = await backendHealth.text();
+    res.json({
+      backendStatus: backendHealth.status,
+      backendBody: healthText,
+      timestamp: new Date().toISOString(),
+    });
+  } catch (err) {
+    res.status(500).json({ error: 'Backend unreachable', details: err.message });
+  }
+});
+
 // Proxy /api to discordhooks on port 4000
 app.use('/api', createProxyMiddleware({
   target: 'http://localhost:4000',
