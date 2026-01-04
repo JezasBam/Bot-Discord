@@ -13,6 +13,10 @@ const server = createServer(app);
 app.use('/api', createProxyMiddleware({
   target: 'http://localhost:4000',
   changeOrigin: true,
+  onError: (err, req, res) => {
+    console.error('Proxy error:', err.message);
+    res.status(500).send('Proxy error: ' + err.message);
+  },
 }));
 
 // Proxy Socket.IO to discordhooks on port 4000
@@ -20,6 +24,9 @@ app.use('/socket.io', createProxyMiddleware({
   target: 'http://localhost:4000',
   changeOrigin: true,
   ws: true,
+  onError: (err, req, res) => {
+    console.error('Socket.IO proxy error:', err.message);
+  },
 }));
 
 // Serve frontend static files from dist
