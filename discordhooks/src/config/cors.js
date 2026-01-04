@@ -10,6 +10,8 @@ const CORS_ORIGINS = process.env.CORS_ORIGINS?.split(",") || [
   "http://127.0.0.1:3000",
   "http://127.0.0.1:3001",
   "http://127.0.0.1:3004",
+  "https://discord.bambook.ro",
+  "http://discord.bambook.ro",
 ];
 
 export { CORS_ORIGINS };
