@@ -20,6 +20,11 @@ export default defineConfig({
       },
     },
   },
+  preview: {
+    port: 4173,
+    host: true,
+    allowedHosts: ['*.traefik.me'],
+  },
   build: {
     rollupOptions: {
       external: ['vitest'],
