@@ -18,6 +18,6 @@ ENV VITE_SOCKET_URL=/
 
 RUN npm run frontend:build
 
-EXPOSE 4173
+EXPOSE 4000
 
-CMD ["npx","concurrently","-n","ticketbot,hooks,proxy","-c","yellow,blue,green","npm run ticketbot:start","npm run hooks:start","node proxy-server.js"]
+CMD ["npx","concurrently","-n","ticketbot,hooks","-c","yellow,blue","npm run ticketbot:start","npm run hooks:start"]
