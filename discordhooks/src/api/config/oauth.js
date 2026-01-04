@@ -8,7 +8,7 @@ console.log("All CLIENT-related env vars:", Object.keys(process.env).filter(key 
 export const DISCORD_OAUTH = {
   CLIENT_ID: process.env.CLIENT_ID || '1451236548698837076',
   CLIENT_SECRET: process.env.DISCORD_CLIENT_SECRET || 'FPIhk8HkVAgB2dDlCKuffzdSc_jVvRCo',
-  REDIRECT_URI: process.env.DISCORD_REDIRECT_URI || 'http://localhost:3001/auth/callback',
+  REDIRECT_URI: process.env.DISCORD_REDIRECT_URI || 'https://discord.bambook.ro/api/auth/callback',
   SCOPES: ['identify', 'guilds'],
   
   getAuthUrl() {

@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Wifi, LogOut, Crown, Server } from "lucide-react";
+import { API_BASE } from "@/config/env";
 
 interface User {
   id: string;
@@ -71,7 +72,7 @@ export function useAuth() {
   const checkBotPresenceAfterInvite = async (guildId: string) => {
     try {
       console.log(`🔍 Checking bot presence after invite for guild: ${guildId}`);
-      const response = await fetch(`/api/guilds/${guildId}/channels`);
+      const response = await fetch(`${API_BASE}/guilds/${guildId}/channels`);
       
       if (response.ok) {
         console.log("✅ Bot has joined the guild after invite!");
@@ -92,7 +93,7 @@ export function useAuth() {
     try {
       console.log("🔍 Fetching user session for userId:", userId);
       setAuthState(prev => ({ ...prev, isLoading: true }));
-      const response = await fetch(`/api/auth/session/${userId}`);
+      const response = await fetch(`${API_BASE}/auth/session/${userId}`);
       console.log("📡 Session response status:", response.status);
       
       if (response.ok) {
@@ -128,9 +129,9 @@ export function useAuth() {
   const login = async () => {
     try {
       console.log("🔍 Starting authentication...");
-      console.log("🌐 Fetching auth URL from:", '/api/auth/url');
+      console.log("🌐 Fetching auth URL from:", `${API_BASE}/auth/url`);
       
-      const response = await fetch('/api/auth/url');
+      const response = await fetch(`${API_BASE}/auth/url`);
       console.log("📡 Auth URL Response status:", response.status);
       
       if (!response.ok) {
@@ -138,7 +139,13 @@ export function useAuth() {
         console.error("❌ Auth URL Response error:", errorText);
         throw new Error(`Failed to get auth URL: ${response.status}`);
       }
-      
+
+      const contentType = response.headers.get("content-type") || "";
+      if (!contentType.includes("application/json")) {
+        const bodyText = await response.text();
+        throw new Error(`Auth URL endpoint returned non-JSON (${contentType}): ${bodyText.slice(0, 200)}`);
+      }
+
       const { authUrl } = await response.json();
       console.log("🔗 Received auth URL:", authUrl);
       
@@ -157,7 +164,7 @@ export function useAuth() {
     const userId = authState.user?.id;
     if (userId) {
       try {
-        await fetch(`/api/auth/logout/${userId}`, { method: 'POST' });
+        await fetch(`${API_BASE}/auth/logout/${userId}`, { method: 'POST' });
         localStorage.removeItem('userId');
         setAuthState({
           user: null,

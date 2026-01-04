@@ -52,6 +52,10 @@ export function createApiServer(client, logger) {
   app.use("/api/bot", createBotRouter(client, logger));
   app.use("/api/auth", createAuthRouter(logger));
 
+  app.use("/api", (req, res) => {
+    res.status(404).json({ error: "Not found" });
+  });
+
   app.use(express.static(frontendDistPath));
 
   app.get("*", (req, res, next) => {

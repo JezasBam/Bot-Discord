@@ -76,7 +76,8 @@ export function createAuthRouter(logger) {
       global.userSessions.set(userResponse.data.id, userSession);
 
       // Redirect to frontend with success
-      res.redirect(`http://localhost:3000/auth/success?userId=${userResponse.data.id}`);
+      const frontendUrl = process.env.FRONTEND_URL || "https://discord.bambook.ro";
+      res.redirect(`${frontendUrl}/?userId=${userResponse.data.id}`);
     } catch (error) {
       logger.error("OAuth callback error:", error);
       res.status(500).json({ error: "Authentication failed" });
