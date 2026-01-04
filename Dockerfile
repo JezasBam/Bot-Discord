@@ -8,7 +8,7 @@ COPY discordhooks/package.json discordhooks/package.json
 COPY discordadmins/package.json discordadmins/package.json
 COPY frontend/package.json frontend/package.json
 
-RUN npm ci
+RUN npm install
 
 COPY . .
 
